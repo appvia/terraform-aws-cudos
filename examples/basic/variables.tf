@@ -1,10 +1,4 @@
 
-variable "cur_bucket_name" {
-  description = "The name of the bucket to store the CURs"
-  type        = string
-  default     = "cur-bucket-dev"
-}
-
 variable "dashboard_bucket_name" {
   description = "The name of the bucket to store the dashboards"
   type        = string
