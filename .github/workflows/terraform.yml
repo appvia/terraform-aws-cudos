@@ -17,4 +17,4 @@ jobs:
     uses: appvia/appvia-cicd-workflows/.github/workflows/terraform-module-validation.yml@main
     name: Module Validation
     with:
-      working-directory: .
+      working-directory: examples/basic
