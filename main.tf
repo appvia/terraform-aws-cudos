@@ -67,7 +67,7 @@ resource "aws_iam_role" "cudos_sso" {
 # tfsec:ignore:aws-s3-enable-bucket-logging
 module "dashboard_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "4.1.0"
+  version = "4.1.1"
 
   bucket                  = var.dashbords_bucket_name
   block_public_acls       = true
