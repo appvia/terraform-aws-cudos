@@ -98,7 +98,7 @@ module "dashboard_bucket" {
 ## First we configure the collector to accept the CUR (Cost and Usage Report) from the source account 
 # tfsec:ignore:aws-s3-enable-bucket-logging
 module "collector" {
-  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-destination?ref=0.2.47"
+  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-destination?ref=0.3.1"
 
   # Source account whom will be replicating the CUR data to the collector account
   source_account_ids = [local.management_account_id]
