@@ -278,6 +278,7 @@ resource "aws_cloudformation_stack" "cudos_read_permissions" {
   }
 
   depends_on = [
+    aws_s3_object.cloudformation_templates,
     module.collector,
     module.dashboards,
     module.source,
@@ -310,6 +311,7 @@ resource "aws_cloudformation_stack" "cudos_data_collection" {
 
   depends_on = [
     aws_cloudformation_stack.cudos_read_permissions,
+    aws_s3_object.cloudformation_templates,
     module.collector,
     module.dashboards,
     module.source,
