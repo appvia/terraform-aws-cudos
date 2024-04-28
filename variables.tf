@@ -33,6 +33,78 @@ variable "enable_sso" {
   default     = true
 }
 
+variable "enable_cost_anomaly_module" {
+  description = "Indicates if the Cost Anomaly module should be enabled"
+  type        = bool
+  default     = true
+}
+
+variable "enable_backup_module" {
+  description = "Indicates if the Backup module should be enabled"
+  type        = bool
+  default     = true
+}
+
+variable "enable_budgets_module" {
+  description = "Indicates if the Budget module should be enabled"
+  type        = bool
+  default     = true
+}
+
+variable "enable_ecs_chargeback_module" {
+  description = "Indicates if the ECS Chargeback module should be enabled"
+  type        = bool
+  default     = false
+}
+
+variable "enable_inventory_module" {
+  description = "Indicates if the Inventory module should be enabled"
+  type        = bool
+  default     = true
+}
+
+variable "enable_rds_utilization_module" {
+  description = "Indicates if the RDS Utilization module should be enabled"
+  type        = bool
+  default     = true
+}
+
+variable "enable_rightsizing_module" {
+  description = "Indicates if the Rightsizing module should be enabled"
+  type        = bool
+  default     = true
+}
+
+variable "enable_org_data_module" {
+  description = "Indicates if the Organization Data module should be enabled"
+  type        = bool
+  default     = true
+}
+
+variable "enable_transit_gateway_module" {
+  description = "Indicates if the Transit Gateway module should be enabled"
+  type        = bool
+  default     = true
+}
+
+variable "enable_tao_module" {
+  description = "Indicates if the TAO module should be enabled"
+  type        = bool
+  default     = true
+}
+
+variable "enable_cost_optimization_hub_module" {
+  description = "Indicates if the Compute Optimization Hub module should be enabled"
+  type        = bool
+  default     = true
+}
+
+variable "enable_compute_optimizer_module" {
+  description = "Indicates if the Compute Optimizer module should be enabled"
+  type        = bool
+  default     = true
+}
+
 variable "enable_cudos_v5_dashboard" {
   description = "Indicates if the CUDOS V5 framework should be enabled"
   type        = bool
