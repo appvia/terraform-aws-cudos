@@ -12,5 +12,15 @@ locals {
   organization_root_id = data.aws_organizations_organization.current.roots[0].id
   ## The s3 bucket name for the cloudformation scripts 
   template_base_url = format("https://%s.s3.%s.amazonaws.com", var.stacks_bucket_name, local.region)
+  ## Is the user mappings for the quicksight groups
+  user_group_mappings = merge([
+    for n, g in var.quicksight_groups : {
+      for u in g.members :
+      join("-", [n, u]) => {
+        user  = u
+        group = n
+      }
+    } if var.enable_sso
+  ]...)
 }
 

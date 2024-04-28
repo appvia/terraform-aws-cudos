@@ -98,8 +98,8 @@ data "aws_iam_policy_document" "dashboards_bucket_policy" {
       identifiers = [local.account_id]
     }
     resources = [
-      format("arn:aws:s3:::%s", var.dashbords_bucket_name),
-      format("arn:aws:s3:::%s/*", var.dashbords_bucket_name),
+      format("arn:aws:s3:::%s", var.dashboards_bucket_name),
+      format("arn:aws:s3:::%s/*", var.dashboards_bucket_name),
     ]
   }
 }
@@ -151,10 +151,14 @@ resource "aws_s3_object" "cloudformation_templates" {
   bucket = module.cloudformation_bucket.s3_bucket_id
   key    = each.value
   source = "${path.module}/assets/cloudformation/${each.value}"
+  etag   = filemd5("${path.module}/assets/cloudformation/cudos/${each.value}")
+
+  provider = aws.cost_analysis
 }
 
 ## Provision a bucket used to contain the cudos dashboards - note this
 ## bucket must be public due to the consuming tterraform module
+#
 # tfsec:ignore:aws-s3-enable-bucket-logging
 module "dashboard_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
@@ -167,7 +171,7 @@ module "dashboard_bucket" {
   acl                                      = "private"
   block_public_acls                        = true
   block_public_policy                      = true
-  bucket                                   = var.dashbords_bucket_name
+  bucket                                   = var.dashboards_bucket_name
   expected_bucket_owner                    = local.account_id
   force_destroy                            = true
   ignore_public_acls                       = true
