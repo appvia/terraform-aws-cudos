@@ -63,22 +63,47 @@ resource "aws_iam_role" "cudos_sso" {
 }
 
 ## Craft and IAM policy that allows the account to access the bucket 
-data "aws_iam_policy_document" "bucket_policy" {
+data "aws_iam_policy_document" "stack_bucket_policy" {
   statement {
     effect = "Allow"
     actions = [
-      "s3:Delete*",
-      "s3:Get*",
-      "s3:List*",
-      "s3:Put*",
+      "s3:DeleteObject",
+      "s3:GetObject",
+      "s3:ListBucket",
+      "s3:PutObject",
     ]
     principals {
       type        = "AWS"
-      identifiers = ["arn:aws:iam::${local.account_id}:root"]
+      identifiers = [local.account_id]
     }
-    resources = ["*"]
+    resources = [
+      format("arn:aws:s3:::%s", var.stacks_bucket_name),
+      format("arn:aws:s3:::%s/*", var.stacks_bucket_name),
+    ]
   }
 }
+
+## Craft and IAM policy that allows the account to access the bucket
+data "aws_iam_policy_document" "dashboards_bucket_policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:DeleteObject",
+      "s3:GetObject",
+      "s3:ListBucket",
+      "s3:PutObject",
+    ]
+    principals {
+      type        = "AWS"
+      identifiers = [local.account_id]
+    }
+    resources = [
+      format("arn:aws:s3:::%s", var.dashbords_bucket_name),
+      format("arn:aws:s3:::%s/*", var.dashbords_bucket_name),
+    ]
+  }
+}
+
 
 ## Provision a bucket used to contain the cloudformation templates  
 # tfsec:ignore:aws-s3-enable-bucket-logging
@@ -98,7 +123,7 @@ module "cloudformation_bucket" {
   force_destroy                            = true
   ignore_public_acls                       = true
   object_ownership                         = "BucketOwnerPreferred"
-  policy                                   = data.aws_iam_policy_document.bucket_policy.json
+  policy                                   = data.aws_iam_policy_document.stack_bucket_policy.json
   restrict_public_buckets                  = true
   tags                                     = var.tags
 
@@ -147,7 +172,7 @@ module "dashboard_bucket" {
   force_destroy                            = true
   ignore_public_acls                       = true
   object_ownership                         = "BucketOwnerPreferred"
-  policy                                   = data.aws_iam_policy_document.bucket_policy.json
+  policy                                   = data.aws_iam_policy_document.dashboards_bucket_policy.json
   restrict_public_buckets                  = true
   tags                                     = var.tags
 
