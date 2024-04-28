@@ -6,5 +6,4 @@ data "aws_caller_identity" "cost_analysis" {
 data "aws_organizations_organization" "current" {
   provider = aws.management
 }
-## Find the management account id from the organization 
 
