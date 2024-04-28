@@ -170,14 +170,15 @@ module "dashboards" {
     "PrerequisitesQuickSightPermissions" = var.enable_prerequisites_quicksight_permissions ? "yes" : "no"
     "QuickSightUser"                     = var.quicksights_username
   }
-  providers = {
-    aws = aws.cost_analysis
-  }
 
   depends_on = [
     module.collector,
     module.source,
   ]
+
+  providers = {
+    aws = aws.cost_analysis
+  }
 }
 
 ## We need to provision the read permissions stack in the management account  
@@ -189,18 +190,18 @@ resource "aws_cloudformation_stack" "cudos_read_permissions" {
   parameters = {
     "AllowModuleReadInMgmt"            = "yes",
     "DataCollectionAccountID"          = local.cost_analysis_account_id,
+    "IncludeBackupModule"              = var.enable_backup_module ? "yes" : "no",
+    "IncludeBudgetsModule"             = var.enable_budgets_module ? "yes" : "no",
+    "IncludeComputeOptimizerModule"    = var.enable_compute_optimizer_module ? "yes" : "no",
+    "IncludeCostAnomalyModule"         = var.enable_cost_anomaly_module ? "yes" : "no",
+    "IncludeCostOptimizationHubModule" = var.enable_cost_optimization_hub_module ? "yes" : "no",
+    "IncludeECSChargebackModule"       = var.enable_ecs_chargeback_module ? "yes" : "no",
+    "IncludeInventoryCollectorModule"  = var.enable_inventory_module ? "yes" : "no",
+    "IncludeRDSUtilizationModule"      = var.enable_rds_utilization_module ? "yes" : "no",
+    "IncludeRightsizingModule"         = var.enable_rightsizing_module ? "yes" : "no",
+    "IncludeTAModule"                  = var.enable_tao_module ? "yes" : "no",
+    "IncludeTransitGatewayModule"      = var.enable_transit_gateway_module ? "yes" : "no",
     "OrganizationalUnitIds"            = local.organization_root_id,
-    "IncludeBackupModule"              = "yes",
-    "IncludeBudgetsModule"             = "yes",
-    "IncludeComputeOptimizerModule"    = "yes",
-    "IncludeCostAnomalyModule"         = "yes",
-    "IncludeCostOptimizationHubModule" = "yes",
-    "IncludeECSChargebackModule"       = "no",
-    "IncludeInventoryCollectorModule"  = "yes",
-    "IncludeRDSUtilizationModule"      = "yes",
-    "IncludeRightsizingModule"         = "yes",
-    "IncludeTAModule"                  = "yes",
-    "IncludeTransitGatewayModule"      = "yes",
   }
 
   depends_on = [
@@ -219,19 +220,19 @@ resource "aws_cloudformation_stack" "cudos_data_collection" {
   template_body = file("${path.module}/assets/cloudformation/cudos/deploy-data-collection.yaml")
 
   parameters = {
+    "IncludeBackupModule"              = var.enable_backup_module ? "yes" : "no",
+    "IncludeBudgetsModule"             = var.enable_budgets_module ? "yes" : "no",
+    "IncludeComputeOptimizerModule"    = var.enable_compute_optimizer_module ? "yes" : "no",
+    "IncludeCostAnomalyModule"         = var.enable_cost_anomaly_module ? "yes" : "no",
+    "IncludeCostOptimizationHubModule" = var.enable_cost_optimization_hub_module ? "yes" : "no",
+    "IncludeECSChargebackModule"       = var.enable_ecs_chargeback_module ? "yes" : "no",
+    "IncludeInventoryCollectorModule"  = var.enable_inventory_module ? "yes" : "no",
+    "IncludeOrgDataModule"             = var.enable_org_data_module ? "yes" : "no",
+    "IncludeRDSUtilizationModule"      = var.enable_rds_utilization_module ? "yes" : "no",
+    "IncludeRightsizingModule"         = var.enable_rightsizing_module ? "yes" : "no",
+    "IncludeTAModule"                  = var.enable_tao_module ? "yes" : "no",
+    "IncludeTransitGatewayModule"      = var.enable_transit_gateway_module ? "yes" : "no",
     "ManagementAccountID"              = local.management_account_id,
-    "IncludeBackupModule"              = "yes",
-    "IncludeBudgetsModule"             = "yes",
-    "IncludeComputeOptimizerModule"    = "yes",
-    "IncludeCostAnomalyModule"         = "yes",
-    "IncludeCostOptimizationHubModule" = "yes",
-    "IncludeECSChargebackModule"       = "no",
-    "IncludeInventoryCollectorModule"  = "yes",
-    "IncludeOrgDataModule"             = "yes",
-    "IncludeRDSUtilizationModule"      = "yes",
-    "IncludeRightsizingModule"         = "yes",
-    "IncludeTAModule"                  = "yes",
-    "IncludeTransitGatewayModule"      = "yes",
   }
 
   depends_on = [
