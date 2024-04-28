@@ -4,6 +4,12 @@ variable "tags" {
   type        = map(string)
 }
 
+variable "stacks_bucket_name" {
+  description = "The name of the bucket to store the CloudFormation templates"
+  type        = string
+  default     = "cid-cloudformation-templates"
+}
+
 variable "stack_name_cloud_intelligence" {
   description = "The name of the CloudFormation stack to create the dashboards"
   type        = string

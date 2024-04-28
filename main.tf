@@ -80,6 +80,54 @@ data "aws_iam_policy_document" "bucket_policy" {
   }
 }
 
+## Provision a bucket used to contain the cloudformation templates  
+# tfsec:ignore:aws-s3-enable-bucket-logging
+module "cloudformation_bucket" {
+  source  = "terraform-aws-modules/s3-bucket/aws"
+  version = "4.1.2"
+
+  attach_deny_incorrect_encryption_headers = true
+  attach_deny_insecure_transport_policy    = true
+  attach_deny_unencrypted_object_uploads   = true
+  attach_require_latest_tls_policy         = true
+  acl                                      = "private"
+  block_public_acls                        = true
+  block_public_policy                      = true
+  bucket                                   = var.stacks_bucket_name
+  expected_bucket_owner                    = local.account_id
+  force_destroy                            = true
+  ignore_public_acls                       = true
+  object_ownership                         = "BucketOwnerPreferred"
+  policy                                   = data.aws_iam_policy_document.bucket_policy.json
+  restrict_public_buckets                  = true
+  tags                                     = var.tags
+
+  server_side_encryption_configuration = {
+    rule = {
+      apply_server_side_encryption_by_default = {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+
+  versioning = {
+    enabled = true
+  }
+
+  providers = {
+    aws = aws.cost_analysis
+  }
+}
+
+## Upload the cloudformation templates to the bucket 
+resource "aws_s3_object" "cloudformation_templates" {
+  for_each = fileset("${path.module}/assets/cloudformation/", "**/*.yaml")
+
+  bucket = module.cloudformation_bucket.s3_bucket_id
+  key    = each.value
+  source = "${path.module}/assets/cloudformation/${each.value}"
+}
+
 ## Provision a bucket used to contain the cudos dashboards - note this
 ## bucket must be public due to the consuming tterraform module
 # tfsec:ignore:aws-s3-enable-bucket-logging
@@ -183,9 +231,9 @@ module "dashboards" {
 
 ## We need to provision the read permissions stack in the management account  
 resource "aws_cloudformation_stack" "cudos_read_permissions" {
-  name          = var.stack_name_read_permissions
-  capabilities  = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
-  template_body = file("${path.module}/assets/cloudformation/cudos/deploy-data-read-permissions.yaml")
+  name         = var.stack_name_read_permissions
+  capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
+  template_url = format("%s/%s", local.template_base_url, "deploy-data-read-permissions.yaml")
 
   parameters = {
     "AllowModuleReadInMgmt"            = "yes",
@@ -215,9 +263,9 @@ resource "aws_cloudformation_stack" "cudos_read_permissions" {
 
 ## We need to provision the data collection stack in the colletor account 
 resource "aws_cloudformation_stack" "cudos_data_collection" {
-  name          = var.stack_name_collectors
-  capabilities  = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
-  template_body = file("${path.module}/assets/cloudformation/cudos/deploy-data-collection.yaml")
+  name         = var.stack_name_collectors
+  capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
+  template_url = format("%s/%s", local.template_base_url, "deploy-data-collection.yaml")
 
   parameters = {
     "IncludeBackupModule"              = var.enable_backup_module ? "yes" : "no",
