@@ -7,7 +7,7 @@
 module "cudos_framework" {
   source = "../.."
 
-  dashbords_bucket_name              = var.dashboard_bucket_name
+  dashboards_bucket_name             = var.dashboard_bucket_name
   enable_compute_optimizer_dashboard = true
   enable_cost_intelligence_dashboard = true
   enable_cudos_dashboard             = true

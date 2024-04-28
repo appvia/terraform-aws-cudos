@@ -4,6 +4,12 @@ variable "tags" {
   type        = map(string)
 }
 
+variable "stacks_bucket_name" {
+  description = "The name of the bucket to store the CloudFormation templates"
+  type        = string
+  default     = "cid-cloudformation-templates"
+}
+
 variable "stack_name_cloud_intelligence" {
   description = "The name of the CloudFormation stack to create the dashboards"
   type        = string
@@ -22,7 +28,7 @@ variable "stack_name_collectors" {
   default     = "CidDataCollectionStack"
 }
 
-variable "dashbords_bucket_name" {
+variable "dashboards_bucket_name" {
   description = "The name of the bucket to store the dashboards configurations"
   type        = string
 }
@@ -159,8 +165,27 @@ variable "saml_metadata" {
   default     = null
 }
 
+variable "quicksight_groups" {
+  description = "Map of groups with user membership to be added to QuickSight"
+  type = map(object({
+    description = optional(string)
+    namespace   = optional(string)
+    members     = optional(list(string), [])
+  }))
+  default = {}
+}
+
 variable "quicksights_username" {
   description = "The username for the QuickSight user"
   type        = string
   default     = "admin"
 }
+
+variable "quicksight_users" {
+  description = "Map of user accounts to be registered in QuickSight"
+  type = map(object({
+    role = optional(string, "READER")
+  }))
+  default = {}
+}
+
