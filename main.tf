@@ -62,6 +62,24 @@ resource "aws_iam_role" "cudos_sso" {
   provider = aws.cost_analysis
 }
 
+## Craft and IAM policy that allows the account to access the bucket 
+data "aws_iam_policy_document" "bucket_policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:Delete*",
+      "s3:Get*",
+      "s3:List*",
+      "s3:Put*",
+    ]
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${local.account_id}:root"]
+    }
+    resources = ["*"]
+  }
+}
+
 ## Provision a bucket used to contain the cudos dashboards - note this
 ## bucket must be public due to the consuming tterraform module
 # tfsec:ignore:aws-s3-enable-bucket-logging
@@ -69,14 +87,21 @@ module "dashboard_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
   version = "4.1.2"
 
-  bucket                  = var.dashbords_bucket_name
-  block_public_acls       = true
-  block_public_policy     = true
-  force_destroy           = true
-  ignore_public_acls      = true
-  object_ownership        = "ObjectWriter"
-  restrict_public_buckets = true
-  tags                    = var.tags
+  attach_deny_incorrect_encryption_headers = true
+  attach_deny_insecure_transport_policy    = true
+  attach_deny_unencrypted_object_uploads   = true
+  attach_require_latest_tls_policy         = true
+  acl                                      = "private"
+  block_public_acls                        = true
+  block_public_policy                      = true
+  bucket                                   = var.dashbords_bucket_name
+  expected_bucket_owner                    = local.account_id
+  force_destroy                            = true
+  ignore_public_acls                       = true
+  object_ownership                         = "BucketOwnerPreferred"
+  policy                                   = data.aws_iam_policy_document.bucket_policy.json
+  restrict_public_buckets                  = true
+  tags                                     = var.tags
 
   server_side_encryption_configuration = {
     rule = {
@@ -98,7 +123,7 @@ module "dashboard_bucket" {
 ## First we configure the collector to accept the CUR (Cost and Usage Report) from the source account 
 # tfsec:ignore:aws-s3-enable-bucket-logging
 module "collector" {
-  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-destination?ref=0.3.1"
+  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-destination?ref=0.3.3"
 
   # Source account whom will be replicating the CUR data to the collector account
   source_account_ids = [local.management_account_id]
@@ -116,7 +141,7 @@ module "collector" {
 # tfsec:ignore:aws-s3-enable-bucket-logging
 # tfsec:ignore:aws-iam-no-policy-wildcards
 module "source" {
-  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-source?ref=0.3.1"
+  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-source?ref=0.3.3"
 
   # The destination bucket to repliaction the CUR data to
   destination_bucket_arn = module.collector.cur_bucket_arn
@@ -129,7 +154,7 @@ module "source" {
 
 ## Provision the cloud intelligence dashboards
 module "dashboards" {
-  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cid-dashboards?ref=0.3.1"
+  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cid-dashboards?ref=0.3.3"
 
   stack_name      = var.stack_name_cloud_intelligence
   template_bucket = module.dashboard_bucket.s3_bucket_id
