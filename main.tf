@@ -74,7 +74,23 @@ data "aws_iam_policy_document" "stack_bucket_policy" {
     ]
     principals {
       type        = "AWS"
-      identifiers = [local.account_id]
+      identifiers = [local.management_account_id]
+    }
+    resources = [
+      format("arn:aws:s3:::%s", var.stacks_bucket_name),
+      format("arn:aws:s3:::%s/*", var.stacks_bucket_name),
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:GetObject",
+      "s3:ListBucket",
+    ]
+    principals {
+      type        = "AWS"
+      identifiers = [local.cost_analysis_account_id]
     }
     resources = [
       format("arn:aws:s3:::%s", var.stacks_bucket_name),
@@ -95,7 +111,7 @@ data "aws_iam_policy_document" "dashboards_bucket_policy" {
     ]
     principals {
       type        = "AWS"
-      identifiers = [local.account_id]
+      identifiers = [local.cost_analysis_account_id]
     }
     resources = [
       format("arn:aws:s3:::%s", var.dashboards_bucket_name),
@@ -111,21 +127,17 @@ module "cloudformation_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
   version = "4.1.2"
 
-  attach_deny_incorrect_encryption_headers = true
-  attach_deny_insecure_transport_policy    = true
-  attach_deny_unencrypted_object_uploads   = true
-  attach_require_latest_tls_policy         = true
-  acl                                      = "private"
-  block_public_acls                        = true
-  block_public_policy                      = true
-  bucket                                   = var.stacks_bucket_name
-  expected_bucket_owner                    = local.account_id
-  force_destroy                            = true
-  ignore_public_acls                       = true
-  object_ownership                         = "BucketOwnerPreferred"
-  policy                                   = data.aws_iam_policy_document.stack_bucket_policy.json
-  restrict_public_buckets                  = true
-  tags                                     = var.tags
+  attach_policy           = true
+  block_public_acls       = true
+  block_public_policy     = true
+  bucket                  = var.stacks_bucket_name
+  expected_bucket_owner   = local.management_account_id
+  force_destroy           = true
+  ignore_public_acls      = true
+  object_ownership        = "BucketOwnerPreferred"
+  policy                  = data.aws_iam_policy_document.stack_bucket_policy.json
+  restrict_public_buckets = true
+  tags                    = var.tags
 
   server_side_encryption_configuration = {
     rule = {
@@ -140,7 +152,7 @@ module "cloudformation_bucket" {
   }
 
   providers = {
-    aws = aws.cost_analysis
+    aws = aws.management
   }
 }
 
@@ -148,12 +160,13 @@ module "cloudformation_bucket" {
 resource "aws_s3_object" "cloudformation_templates" {
   for_each = fileset("${path.module}/assets/cloudformation/", "**/*.yaml")
 
-  bucket = module.cloudformation_bucket.s3_bucket_id
-  key    = each.value
-  source = "${path.module}/assets/cloudformation/${each.value}"
-  etag   = filemd5("${path.module}/assets/cloudformation/cudos/${each.value}")
+  bucket                 = module.cloudformation_bucket.s3_bucket_id
+  etag                   = filemd5("${path.module}/assets/cloudformation/cudos/${each.value}")
+  key                    = each.value
+  server_side_encryption = "AES256"
+  source                 = "${path.module}/assets/cloudformation/${each.value}"
 
-  provider = aws.cost_analysis
+  provider = aws.management
 }
 
 ## Provision a bucket used to contain the cudos dashboards - note this
@@ -164,21 +177,17 @@ module "dashboard_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
   version = "4.1.2"
 
-  attach_deny_incorrect_encryption_headers = true
-  attach_deny_insecure_transport_policy    = true
-  attach_deny_unencrypted_object_uploads   = true
-  attach_require_latest_tls_policy         = true
-  acl                                      = "private"
-  block_public_acls                        = true
-  block_public_policy                      = true
-  bucket                                   = var.dashboards_bucket_name
-  expected_bucket_owner                    = local.account_id
-  force_destroy                            = true
-  ignore_public_acls                       = true
-  object_ownership                         = "BucketOwnerPreferred"
-  policy                                   = data.aws_iam_policy_document.dashboards_bucket_policy.json
-  restrict_public_buckets                  = true
-  tags                                     = var.tags
+  attach_policy           = true
+  block_public_acls       = true
+  block_public_policy     = true
+  bucket                  = var.dashboards_bucket_name
+  expected_bucket_owner   = local.cost_analysis_account_id
+  force_destroy           = true
+  ignore_public_acls      = true
+  object_ownership        = "BucketOwnerPreferred"
+  policy                  = data.aws_iam_policy_document.dashboards_bucket_policy.json
+  restrict_public_buckets = true
+  tags                    = var.tags
 
   server_side_encryption_configuration = {
     rule = {
@@ -262,7 +271,7 @@ module "dashboards" {
 resource "aws_cloudformation_stack" "cudos_read_permissions" {
   name         = var.stack_name_read_permissions
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
-  template_url = format("%s/%s", local.template_base_url, "deploy-data-read-permissions.yaml")
+  template_url = format("%s/%s", local.stacks_base_url, "deploy-data-read-permissions.yaml")
 
   parameters = {
     "AllowModuleReadInMgmt"            = "yes",
@@ -295,7 +304,7 @@ resource "aws_cloudformation_stack" "cudos_read_permissions" {
 resource "aws_cloudformation_stack" "cudos_data_collection" {
   name         = var.stack_name_collectors
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
-  template_url = format("%s/%s", local.template_base_url, "deploy-data-collection.yaml")
+  template_url = format("%s/%s", local.stacks_base_url, "deploy-data-collection.yaml")
 
   parameters = {
     "IncludeBackupModule"              = var.enable_backup_module ? "yes" : "no",
