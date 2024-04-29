@@ -53,6 +53,14 @@ The following is taken from the Cloud Intelligence Dashboards framework, and dep
 - [CID Framework](https://github.com/awslabs/cid-framework)
 - [CUDOS Deployment](https://github.com/aws-samples/aws-cudos-framework-deployment)
 
+## Upgrading the dashboards
+
+Due to the level of customization that can be done with the dashboards, it is recommended to follow the official documentation to upgrade the dashboards. The following steps are a general guide to upgrade the dashboards:
+
+1. Download the latest version of `cid-cmd`, the instructions can be found [here](https://github.com/aws-samples/aws-cudos-framework-deployment?tab=readme-ov-file#install)
+2. Run the `cic-cmd` command to upgrade the dashboards, selecting each of the dashboards that you want to upgrade.
+3. Pay attention the Athena views, ensuring any customizations are not overwritten.
+
 ## Update Documentation
 
 The `terraform-docs` utility is used to generate this README. Follow the below steps to update:
