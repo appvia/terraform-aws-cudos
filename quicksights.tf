@@ -3,9 +3,9 @@
 resource "aws_quicksight_group" "groups" {
   for_each = var.quicksight_groups
 
+  description = each.value.description
   group_name  = each.key
   namespace   = each.value.namespace
-  description = each.value.description
 
   provider = aws.cost_analysis
 }
@@ -15,10 +15,11 @@ resource "aws_quicksight_user" "users" {
   for_each = var.quicksight_users
 
   email         = each.key
-  identity_type = "IAM"
-  user_role     = each.value.role
   iam_arn       = aws_iam_role.cudos_sso[0].arn
+  identity_type = "IAM"
   session_name  = each.key
+  user_name     = format("%s/%s", aws_iam_role.cudos_sso[0].name, each.key)
+  user_role     = each.value.role
 
   provider = aws.cost_analysis
 }
@@ -30,9 +31,7 @@ resource "aws_quicksight_group_membership" "members" {
   group_name  = aws_quicksight_group.groups[each.value.group].group_name
   member_name = format("%s/%s", aws_iam_role.cudos_sso[0].name, each.value.user)
 
-  provider = aws.cost_analysis
+  depends_on = [aws_quicksight_user.users]
 
-  depends_on = [
-    aws_quicksight_user.users,
-  ]
+  provider = aws.cost_analysis
 }
