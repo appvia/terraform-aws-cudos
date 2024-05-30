@@ -59,7 +59,7 @@ init:
 
 security: 
 	@echo "--> Running Security checks"
-	@tfsec .
+	@trivy config .
 	$(MAKE) security-modules
 	$(MAKE) security-examples
 
@@ -68,7 +68,7 @@ security-modules:
 	@if [ -d modules ]; then \
 		find modules -type d -mindepth 1 -maxdepth 1 | while read -r dir; do \
 			echo "--> Validating $$dir"; \
-			tfsec $$dir; \
+			trivy config $$dir; \
 		done; \
 	fi
 
@@ -77,7 +77,7 @@ security-examples:
 	@if [ -d examples ]; then \
 		find examples -type d -mindepth 1 -maxdepth 1 | while read -r dir; do \
 			echo "--> Validating $$dir"; \
-			tfsec $$dir; \
+			trivy config $$dir; \
 		done; \
 	fi
 
