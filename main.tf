@@ -276,12 +276,14 @@ resource "aws_cloudformation_stack" "cudos_read_permissions" {
   parameters = {
     "AllowModuleReadInMgmt"            = "yes",
     "DataCollectionAccountID"          = local.cost_analysis_account_id,
+    "IncludeAWSFeedsModule"            = var.enable_aws_newsfeed ? "yes" : "no",
     "IncludeBackupModule"              = var.enable_backup_module ? "yes" : "no",
     "IncludeBudgetsModule"             = var.enable_budgets_module ? "yes" : "no",
     "IncludeComputeOptimizerModule"    = var.enable_compute_optimizer_module ? "yes" : "no",
     "IncludeCostAnomalyModule"         = var.enable_cost_anomaly_module ? "yes" : "no",
     "IncludeCostOptimizationHubModule" = var.enable_cost_optimization_hub_module ? "yes" : "no",
     "IncludeECSChargebackModule"       = var.enable_ecs_chargeback_module ? "yes" : "no",
+    "IncludeHealthEventsModule"        = var.enable_health_events ? "yes" : "no"
     "IncludeInventoryCollectorModule"  = var.enable_inventory_module ? "yes" : "no",
     "IncludeRDSUtilizationModule"      = var.enable_rds_utilization_module ? "yes" : "no",
     "IncludeRightsizingModule"         = var.enable_rightsizing_module ? "yes" : "no",
@@ -307,12 +309,14 @@ resource "aws_cloudformation_stack" "cudos_data_collection" {
   template_url = format("%s/%s", local.stacks_base_url, "deploy-data-collection.yaml")
 
   parameters = {
+    "IncludeAWSFeedsModule"            = var.enable_aws_newsfeed ? "yes" : "no",
     "IncludeBackupModule"              = var.enable_backup_module ? "yes" : "no",
     "IncludeBudgetsModule"             = var.enable_budgets_module ? "yes" : "no",
     "IncludeComputeOptimizerModule"    = var.enable_compute_optimizer_module ? "yes" : "no",
     "IncludeCostAnomalyModule"         = var.enable_cost_anomaly_module ? "yes" : "no",
     "IncludeCostOptimizationHubModule" = var.enable_cost_optimization_hub_module ? "yes" : "no",
     "IncludeECSChargebackModule"       = var.enable_ecs_chargeback_module ? "yes" : "no",
+    "IncludeHealthEventsModule"        = var.enable_health_events ? "yes" : "no"
     "IncludeInventoryCollectorModule"  = var.enable_inventory_module ? "yes" : "no",
     "IncludeOrgDataModule"             = var.enable_org_data_module ? "yes" : "no",
     "IncludeRDSUtilizationModule"      = var.enable_rds_utilization_module ? "yes" : "no",

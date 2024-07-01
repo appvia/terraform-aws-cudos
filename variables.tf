@@ -45,6 +45,18 @@ variable "enable_cost_anomaly_module" {
   default     = true
 }
 
+variable "enable_health_events" {
+  description = "Indicates if the Health Events module should be enabled"
+  type        = bool
+  default     = true
+}
+
+variable "enable_aws_newsfeed" {
+  description = "Indicates if the AWS News Feed module should be enabled"
+  type        = bool
+  default     = true
+}
+
 variable "enable_backup_module" {
   description = "Indicates if the Backup module should be enabled"
   type        = bool
