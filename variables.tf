@@ -4,20 +4,32 @@ variable "tags" {
   type        = map(string)
 }
 
-variable "enable_quicksight_enterprise" {
-  description = "Enable QuickSight Enterprise edition"
+variable "enable_quicksight_subscription" {
+  description = "Enable QuickSight subscription"
   type        = bool
   default     = false
 }
 
-variable "enterprise_email" {
-  description = "The email address for the QuickSight Enterprise edition"
+variable "quicksight_subscription_email" {
+  description = "The email address for the QuickSight quicksight_subscription edition"
   type        = string
   default     = null
 }
 
-variable "enterprise_account_name" {
-  description = "The account name for the QuickSight Enterprise edition"
+variable "quicksight_subscription_authentication_method" {
+  description = "The identity for the QuickSight quicksight_subscription edition"
+  type        = string
+  default     = "IAM_AND_QUICKSIGHT"
+}
+
+variable "quicksight_subscription_edition" {
+  description = "The edition for the QuickSight quicksight_subscription"
+  type        = string
+  default     = "ENTERPRISE"
+}
+
+variable "quicksight_subscription_account_name" {
+  description = "The account name for the QuickSight quicksight_subscription edition"
   type        = string
   default     = null
 }
