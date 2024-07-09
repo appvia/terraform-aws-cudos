@@ -4,6 +4,24 @@ variable "tags" {
   type        = map(string)
 }
 
+variable "enable_quicksight_enterprise" {
+  description = "Enable QuickSight Enterprise edition"
+  type        = bool
+  default     = false
+}
+
+variable "enterprise_email" {
+  description = "The email address for the QuickSight Enterprise edition"
+  type        = string
+  default     = null
+}
+
+variable "enterprise_account_name" {
+  description = "The account name for the QuickSight Enterprise edition"
+  type        = string
+  default     = null
+}
+
 variable "stacks_bucket_name" {
   description = "The name of the bucket to store the CloudFormation templates"
   type        = string

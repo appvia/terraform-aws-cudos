@@ -1,4 +1,14 @@
 
+## Provision enterprise quicksight if enabled 
+resource "aws_quicksight_account_subscription" "subscription" {
+  count = var.enable_quicksight_enterprise ? 1 : 0
+
+  account_name          = var.enterprise_account_name
+  authentication_method = "IAM_AND_QUICKSIGHT"
+  edition               = "ENTERPRISE"
+  notification_email    = var.enterprise_email
+}
+
 ## Provision a SAML identity provider in the data collection account - this will be 
 ## used to authenticate sso users into quicksights 
 resource "aws_iam_saml_provider" "saml" {
