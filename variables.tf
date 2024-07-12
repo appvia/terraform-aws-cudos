@@ -120,7 +120,7 @@ variable "enable_rightsizing_module" {
 variable "enable_org_data_module" {
   description = "Indicates if the Organization Data module should be enabled"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "enable_license_manager_module" {
