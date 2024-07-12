@@ -129,6 +129,12 @@ variable "enable_org_data_module" {
   default     = true
 }
 
+variable "enable_license_manager_module" {
+  description = "Indicates if the License Manager module should be enabled"
+  type        = bool
+  default     = false
+}
+
 variable "enable_transit_gateway_module" {
   description = "Indicates if the Transit Gateway module should be enabled"
   type        = bool
