@@ -289,7 +289,6 @@ resource "aws_cloudformation_stack" "cudos_read_permissions" {
   parameters = {
     "AllowModuleReadInMgmt"            = "yes",
     "DataCollectionAccountID"          = local.cost_analysis_account_id,
-    "IncludeAWSFeedsModule"            = var.enable_aws_newsfeed ? "yes" : "no",
     "IncludeBackupModule"              = var.enable_backup_module ? "yes" : "no",
     "IncludeBudgetsModule"             = var.enable_budgets_module ? "yes" : "no",
     "IncludeComputeOptimizerModule"    = var.enable_compute_optimizer_module ? "yes" : "no",
@@ -298,9 +297,9 @@ resource "aws_cloudformation_stack" "cudos_read_permissions" {
     "IncludeECSChargebackModule"       = var.enable_ecs_chargeback_module ? "yes" : "no",
     "IncludeHealthEventsModule"        = var.enable_health_events ? "yes" : "no"
     "IncludeInventoryCollectorModule"  = var.enable_inventory_module ? "yes" : "no",
-    "IncludeOrgDataModule"             = var.enable_org_data_module ? "yes" : "no",
     "IncludeRDSUtilizationModule"      = var.enable_rds_utilization_module ? "yes" : "no",
     "IncludeRightsizingModule"         = var.enable_rightsizing_module ? "yes" : "no",
+    "IncludeOrgDataModule"             = var.enable_org_data_module ? "yes" : "no",
     "IncludeTAModule"                  = var.enable_tao_module ? "yes" : "no",
     "IncludeTransitGatewayModule"      = var.enable_transit_gateway_module ? "yes" : "no",
     "OrganizationalUnitIds"            = local.organization_root_id,
