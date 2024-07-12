@@ -90,10 +90,10 @@ The `terraform-docs` utility is used to generate this README. Follow the below s
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_cloudformation_bucket"></a> [cloudformation\_bucket](#module\_cloudformation\_bucket) | terraform-aws-modules/s3-bucket/aws | 4.1.2 |
-| <a name="module_collector"></a> [collector](#module\_collector) | github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-destination | 0.3.5 |
+| <a name="module_collector"></a> [collector](#module\_collector) | github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-destination | 0.3.8 |
 | <a name="module_dashboard_bucket"></a> [dashboard\_bucket](#module\_dashboard\_bucket) | terraform-aws-modules/s3-bucket/aws | 4.1.2 |
-| <a name="module_dashboards"></a> [dashboards](#module\_dashboards) | github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cid-dashboards | 0.3.5 |
-| <a name="module_source"></a> [source](#module\_source) | github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-source | 0.3.5 |
+| <a name="module_dashboards"></a> [dashboards](#module\_dashboards) | github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cid-dashboards | 0.3.8 |
+| <a name="module_source"></a> [source](#module\_source) | github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-source | 0.3.8 |
 
 ## Resources
 
