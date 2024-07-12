@@ -81,12 +81,6 @@ variable "enable_health_events" {
   default     = true
 }
 
-variable "enable_aws_newsfeed" {
-  description = "Indicates if the AWS News Feed module should be enabled"
-  type        = bool
-  default     = true
-}
-
 variable "enable_backup_module" {
   description = "Indicates if the Backup module should be enabled"
   type        = bool
