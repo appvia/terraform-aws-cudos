@@ -284,7 +284,7 @@ module "dashboards" {
 resource "aws_cloudformation_stack" "cudos_read_permissions" {
   name         = var.stack_name_read_permissions
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
-  template_url = format("%s/%s", local.stacks_base_url, "deploy-data-read-permissions.yaml")
+  template_url = format("%s/cudos/%s", local.stacks_base_url, "deploy-data-read-permissions.yaml")
 
   parameters = {
     "AllowModuleReadInMgmt"            = "yes",
@@ -319,7 +319,7 @@ resource "aws_cloudformation_stack" "cudos_read_permissions" {
 resource "aws_cloudformation_stack" "cudos_data_collection" {
   name         = var.stack_name_collectors
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
-  template_url = format("%s/%s", local.stacks_base_url, "deploy-data-collection.yaml")
+  template_url = format("%s/cudos/%s", local.stacks_base_url, "deploy-data-collection.yaml")
 
   parameters = {
     "IncludeAWSFeedsModule"            = var.enable_aws_newsfeed ? "yes" : "no",
