@@ -171,7 +171,7 @@ resource "aws_s3_object" "cloudformation_templates" {
   for_each = fileset("${path.module}/assets/cloudformation/", "**/*.yaml")
 
   bucket                 = module.cloudformation_bucket.s3_bucket_id
-  etag                   = filemd5("${path.module}/assets/cloudformation/cudos/${each.value}")
+  etag                   = filemd5("${path.module}/assets/cloudformation/${each.value}")
   key                    = each.value
   server_side_encryption = "AES256"
   source                 = "${path.module}/assets/cloudformation/${each.value}"
