@@ -16,7 +16,7 @@ resource "aws_quicksight_user" "users" {
 
   email         = each.key
   iam_arn       = aws_iam_role.cudos_sso[0].arn
-  identity_type = "IAM"
+  identity_type = "QUICKSIGHT"
   session_name  = each.key
   user_name     = format("%s/%s", aws_iam_role.cudos_sso[0].name, each.key)
   user_role     = each.value.role

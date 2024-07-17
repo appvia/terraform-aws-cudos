@@ -17,4 +17,3 @@ data "aws_organizations_organization" "current" {
 data "aws_region" "cost_analysis" {
   provider = aws.cost_analysis
 }
-
