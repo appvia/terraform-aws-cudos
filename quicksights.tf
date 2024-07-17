@@ -18,8 +18,7 @@ resource "aws_quicksight_user" "users" {
   iam_arn       = aws_iam_role.cudos_sso[0].arn
   identity_type = "IAM"
   session_name  = each.key
-  #user_name     = format("%s/%s", aws_iam_role.cudos_sso[0].name, each.key)
-  user_role = each.value.role
+  user_role     = each.value.role
 
   provider = aws.cost_analysis
 }
