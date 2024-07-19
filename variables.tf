@@ -226,7 +226,9 @@ variable "quicksights_username" {
 variable "quicksight_users" {
   description = "Map of user accounts to be registered in QuickSight"
   type = map(object({
-    role = optional(string, "READER")
+    identity_type = optional(string, "IAM")
+    namespace     = optional(string, "default")
+    role          = optional(string, "READER")
   }))
   default = {}
 }
