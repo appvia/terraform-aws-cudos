@@ -253,7 +253,7 @@ module "source" {
 
 ## Provision the cloud intelligence dashboards
 module "dashboards" {
-  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cid-dashboards?ref=0.3.8"
+  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cid-dashboards?ref=0.3.9"
 
   stack_name      = var.stack_name_cloud_intelligence
   template_bucket = module.dashboard_bucket.s3_bucket_id
