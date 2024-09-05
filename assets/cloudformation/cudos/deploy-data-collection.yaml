@@ -2,7 +2,7 @@
 ##  https://raw.githubusercontent.com/awslabs/cid-framework/main/data-collection/deploy/deploy-data-collection.yaml
 #
 AWSTemplateFormatVersion: "2010-09-09"
-Description: CID Data Collection Stack v3.0.10
+Description: CID Data Collection Stack v3.3.1
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -26,7 +26,6 @@ Metadata:
           - IncludeBudgetsModule
           - IncludeComputeOptimizerModule
           - IncludeCostAnomalyModule
-          - IncludeCostOptimizationHubModule
           - IncludeECSChargebackModule
           - IncludeHealthEventsModule
           - IncludeInventoryCollectorModule
@@ -39,7 +38,7 @@ Metadata:
           - IncludeLicenseManagerModule
     ParameterLabels:
       DestinationBucket:
-        default: "Destination S3 bucket"
+        default: "Destination S3 bucket prefix"
       ManagementAccountRole:
         default: "Management account role"
       ManagementAccountID:
@@ -80,8 +79,6 @@ Metadata:
         default: "Include AWS TransitGateway Collection Module"
       IncludeBackupModule:
         default: "Include AWS Backup Collection Module"
-      IncludeCostOptimizationHubModule:
-        default: "Include CostOptimizationHub Module"
       IncludeAWSFeedsModule:
         default: "Include AWS Feeds Module"
       IncludeHealthEventsModule:
@@ -125,9 +122,9 @@ Mappings:
     us-west-2:
       { CodeBucket: aws-managed-cost-intelligence-dashboards-us-west-2 }
   StepFunctionCode:
-    main-v1:
+    main-v2:
       {
-        TemplatePath: cfn/data-collection/source/step-functions/main-state-machine-v1.json,
+        TemplatePath: cfn/data-collection/source/step-functions/main-state-machine-v2.json,
       }
     crawler-v1:
       {
@@ -141,7 +138,7 @@ Mappings:
 Parameters:
   DestinationBucket:
     Type: String
-    Description: A Prefix of S3 Bucket name that will hold information. A Bucket name will be concatenated with account_id automatically (cid-data-123456123456). You can keep this parameter as is.
+    Description: "A Prefix of S3 Bucket name that will hold information. A Bucket name will be concatenated with account_id automatically (ex: cid-data-123456123456). You can keep this parameter as is."
     AllowedPattern: (?=^.{3,36}$)(?!^(\d+\.)+\d+$)(^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9\-])$)
     Default: cid-data-
   ManagementAccountRole:
@@ -158,7 +155,7 @@ Parameters:
     Default: "Optimization-Data-Multi-Account-Role"
   Schedule:
     Type: String
-    Description: EventBridge schedule to trigger data collection for Trusted Advisor, Cost Optimization Hub, Compute Optimizer, Organizations Data, Rightsizing, RDS Utilization, Inventory Collector, Transit Gateway, Backup, and ECS Chargeback modules (see docs for tailoring the schedule for each module).
+    Description: EventBridge schedule to trigger data collection for Trusted Advisor, Compute Optimizer, Organizations Data, Rightsizing, RDS Utilization, Inventory Collector, Transit Gateway, Backup, and ECS Chargeback modules (see docs for tailoring the schedule for each module).
     Default: "rate(14 days)"
   ScheduleFrequent:
     Type: String
@@ -237,11 +234,6 @@ Parameters:
     Description: Collects AWS Backup data
     AllowedValues: ["yes", "no"]
     Default: "no"
-  IncludeCostOptimizationHubModule:
-    Type: String
-    Description: Collects CostOptimizationHub data
-    AllowedValues: ["yes", "no"]
-    Default: "no"
   IncludeAWSFeedsModule:
     Type: String
     Description: Collects AWS Feeds data
@@ -258,21 +250,6 @@ Parameters:
     AllowedValues: ["yes", "no"]
     Default: "no"
 
-Outputs:
-  S3Bucket:
-    Description: Name of S3 Bucket which will store the AWS Cost Explorer Rightsizing recommendations
-    Value: !Ref S3Bucket
-  S3BucketARN:
-    Description: ARN of S3 Bucket which will store the AWS Cost Explorer Rightsizing recommendations
-    Value: !GetAtt S3Bucket.Arn
-  RoleARN:
-    Description: "The arn of the IAM role that deployed in the management account which can retrieve AWS Organization data"
-    Value: !Sub "arn:aws:iam::${ManagementAccountID}:role/${ManagementAccountRole}"
-  DataCollectionDatabase:
-    Description: "Techical Value - DataCollectionDatabase"
-    Value: !Ref DatabaseName
-    Export: { Name: "cid-DataCollection-Database" }
-
 Conditions:
   DeployTAModule: !Equals [!Ref IncludeTAModule, "yes"]
   DeployRightsizingModule: !Equals [!Ref IncludeRightsizingModule, "yes"]
@@ -287,8 +264,6 @@ Conditions:
   DeployBudgetsModule: !Equals [!Ref IncludeBudgetsModule, "yes"]
   DeployTransitGatewayModule: !Equals [!Ref IncludeTransitGatewayModule, "yes"]
   DeployBackupModule: !Equals [!Ref IncludeBackupModule, "yes"]
-  DeployCostOptimizationHubModule:
-    !Equals [!Ref IncludeCostOptimizationHubModule, "yes"]
   DeployAWSFeedsModule: !Equals [!Ref IncludeAWSFeedsModule, "yes"]
   DeployHealthEventsModule: !Equals [!Ref IncludeHealthEventsModule, "yes"]
   DeployLicenseManagerModule: !Equals [!Ref IncludeLicenseManagerModule, "yes"]
@@ -309,7 +284,6 @@ Conditions:
     - Fn::Or:
         - !Condition DeployBackupModule
         - !Condition DeployTransitGatewayModule
-        - !Condition DeployCostOptimizationHubModule
         - !Condition DeployHealthEventsModule
         - !Condition DeployLicenseManagerModule
   RegionsInScopeIsEmpty: !Equals
@@ -836,8 +810,7 @@ Resources:
                 Action:
                   - states:StartExecution
                 Resource:
-                  - !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${ResourcePrefix}CrawlerExecution-StateMachine"
-                  - !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${ResourcePrefix}*detail-StateMachine"
+                  - !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${ResourcePrefix}*-StateMachine"
               - Effect: Allow
                 Action:
                   - states:DescribeExecution
@@ -926,7 +899,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v1, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
 
@@ -952,33 +925,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v1, TemplatePath]
-        StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
-        SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
-
-  CostOptimizationHubModule:
-    Type: AWS::CloudFormation::Stack
-    Condition: DeployCostOptimizationHubModule
-    Properties:
-      TemplateURL: !Sub "https://${CFNSourceBucket}.s3.amazonaws.com/cfn/data-collection/module-cost-optimization-hub.yaml"
-      Parameters:
-        DatabaseName: !Ref DatabaseName
-        DestinationBucket: !Ref S3Bucket
-        DestinationBucketARN: !GetAtt S3Bucket.Arn
-        ManagementRoleName: !Sub "${ResourcePrefix}${ManagementAccountRole}"
-        Schedule: !Ref Schedule
-        GlueRoleARN: !GetAtt GlueRole.Arn
-        ResourcePrefix: !Ref ResourcePrefix
-        LambdaAnalyticsARN: !GetAtt LambdaAnalytics.Arn
-        AccountCollectorLambdaARN: !Sub "${AccountCollector.Outputs.LambdaFunctionARN}"
-        CodeBucket:
-          !If [
-            ProdCFNTemplateUsed,
-            !FindInMap [RegionMap, !Ref "AWS::Region", CodeBucket],
-            !Ref CFNSourceBucket,
-          ]
-        StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v1, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
 
@@ -1004,8 +951,9 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v1, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
+        LambdaManageGlueTableARN: !GetAtt LambdaManageGlueTable.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
 
   BackupModule:
@@ -1030,7 +978,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v1, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
 
@@ -1056,7 +1004,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v1, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         LambdaManageGlueTableARN: !GetAtt LambdaManageGlueTable.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
@@ -1119,7 +1067,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v1, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
 
@@ -1145,7 +1093,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v1, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
         RegionsInScope:
@@ -1176,7 +1124,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v1, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
         RegionsInScope:
@@ -1207,7 +1155,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v1, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
 
@@ -1233,7 +1181,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v1, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
 
@@ -1259,7 +1207,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v1, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
         RegionsInScope:
@@ -1314,7 +1262,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v1, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
 
@@ -1340,7 +1288,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v1, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
 
@@ -1355,3 +1303,51 @@ Resources:
         ResourcePrefix: !Ref ResourcePrefix
         DestinationBucket: !Ref S3Bucket
         DestinationBucketARN: !GetAtt S3Bucket.Arn
+
+  DataCollectionReadAccess:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub ${ResourcePrefix}DataCollectionReadAccess
+      Description: "Policy for QuickSight to allow DataCollection access"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowGlue
+            Effect: Allow
+            Action:
+              - glue:GetPartition
+              - glue:GetPartitions
+              - glue:GetDatabase
+              - glue:GetDatabases
+              - glue:GetTable
+              - glue:GetTables
+            Resource:
+              - !Sub arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:catalog
+              - !Sub arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:database/${DatabaseName}
+              - !Sub arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:table/${DatabaseName}/*
+          - Sid: AllowListBucket
+            Effect: Allow
+            Action: s3:ListBucket
+            Resource:
+              - !Sub ${S3Bucket.Arn}
+          - Sid: AllowReadBucket
+            Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:GetObjectVersion
+            Resource:
+              - !Sub ${S3Bucket.Arn}/*
+
+Outputs:
+  Bucket:
+    Description: CID Data Collection - Name of S3 Bucket which will store collected data
+    Value: !Ref S3Bucket
+    Export: { Name: "cid-DataCollection-Bucket" }
+  Database:
+    Description: "Glue Database for CID Data Collection"
+    Value: !Ref DatabaseName
+    Export: { Name: "cid-DataCollection-Database" }
+  ReadAccessPolicyARN:
+    Description: "Access Policy for CID Data Collection"
+    Value: !Ref DataCollectionReadAccess
+    Export: { Name: "cid-DataCollection-ReadAccessPolicyARN" }
