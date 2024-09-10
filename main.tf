@@ -7,6 +7,8 @@ resource "aws_quicksight_account_subscription" "subscription" {
   authentication_method = var.quicksight_subscription_authentication_method
   edition               = var.quicksight_subscription_edition
   notification_email    = var.quicksight_subscription_email
+
+  provider = aws.cost_analysis
 }
 
 ## Provision a SAML identity provider in the data collection account - this will be 
@@ -273,6 +275,7 @@ module "dashboards" {
   depends_on = [
     module.collector,
     module.source,
+    aws_quicksight_account_subscription.subscription,
   ]
 
   providers = {
