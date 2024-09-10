@@ -275,6 +275,7 @@ module "dashboards" {
   depends_on = [
     module.collector,
     module.source,
+    aws_quicksight_account_subscription.subscription,
   ]
 
   providers = {
