@@ -296,7 +296,6 @@ resource "aws_cloudformation_stack" "cudos_read_permissions" {
     "IncludeBudgetsModule"             = var.enable_budgets_module ? "yes" : "no",
     "IncludeComputeOptimizerModule"    = var.enable_compute_optimizer_module ? "yes" : "no",
     "IncludeCostAnomalyModule"         = var.enable_cost_anomaly_module ? "yes" : "no",
-    "IncludeCostOptimizationHubModule" = var.enable_cost_optimization_hub_module ? "yes" : "no",
     "IncludeECSChargebackModule"       = var.enable_ecs_chargeback_module ? "yes" : "no",
     "IncludeHealthEventsModule"        = var.enable_health_events ? "yes" : "no"
     "IncludeInventoryCollectorModule"  = var.enable_inventory_module ? "yes" : "no",
@@ -328,7 +327,6 @@ resource "aws_cloudformation_stack" "cudos_data_collection" {
     "IncludeBudgetsModule"             = var.enable_budgets_module ? "yes" : "no",
     "IncludeComputeOptimizerModule"    = var.enable_compute_optimizer_module ? "yes" : "no",
     "IncludeCostAnomalyModule"         = var.enable_cost_anomaly_module ? "yes" : "no",
-    "IncludeCostOptimizationHubModule" = var.enable_cost_optimization_hub_module ? "yes" : "no",
     "IncludeECSChargebackModule"       = var.enable_ecs_chargeback_module ? "yes" : "no",
     "IncludeHealthEventsModule"        = var.enable_health_events ? "yes" : "no"
     "IncludeInventoryCollectorModule"  = var.enable_inventory_module ? "yes" : "no",

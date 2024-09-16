@@ -141,12 +141,6 @@ variable "enable_tao_module" {
   default     = true
 }
 
-variable "enable_cost_optimization_hub_module" {
-  description = "Indicates if the Compute Optimization Hub module should be enabled"
-  type        = bool
-  default     = true
-}
-
 variable "enable_compute_optimizer_module" {
   description = "Indicates if the Compute Optimizer module should be enabled"
   type        = bool
