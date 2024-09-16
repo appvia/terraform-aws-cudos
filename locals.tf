@@ -2,6 +2,7 @@
 locals {
   ## The region where the stack is being deployed 
   region = data.aws_region.cost_analysis.name
+
   ## Is the account id for the cost analysis account 
   cost_analysis_account_id = data.aws_caller_identity.cost_analysis.account_id
   ## Is the management account id  
@@ -20,5 +21,8 @@ locals {
       }
     } if var.enable_sso
   ]...)
+
+  ## Is the payer account id used in the collection configuration 
+  payer_account_ids = distinct(sort(concat([local.management_account_id], var.additional_payer_accounts)))
 }
 

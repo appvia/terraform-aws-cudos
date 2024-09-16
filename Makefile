@@ -31,9 +31,9 @@ all:
 examples: 
 	@echo "--> Running examples"
 	$(MAKE) documentation
+	$(MAKE) validate-examples 
 	$(MAKE) lint-examples
 	$(MAKE) security-examples
-	$(MAKE) validate-examples 
 
 documentation: 
 	@echo "--> Generating documentation"
