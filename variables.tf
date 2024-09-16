@@ -4,6 +4,12 @@ variable "tags" {
   type        = map(string)
 }
 
+variable "additional_payer_accounts" {
+  description = "List of additional payer accounts to be included in the collectors module"
+  type        = list(string)
+  default     = []
+}
+
 variable "enable_quicksight_subscription" {
   description = "Enable QuickSight subscription"
   type        = bool
