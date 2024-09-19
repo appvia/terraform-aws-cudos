@@ -224,7 +224,7 @@ module "dashboard_bucket" {
 ## First we configure the collector to accept the CUR (Cost and Usage Report) from the source account 
 # tfsec:ignore:aws-s3-enable-bucket-logging
 module "collector" {
-  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-destination?ref=0.3.9"
+  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-destination?ref=0.3.10"
 
   # Source account whom will be replicating the CUR data to the collector account
   source_account_ids = local.payer_account_ids
@@ -242,7 +242,7 @@ module "collector" {
 # tfsec:ignore:aws-s3-enable-bucket-logging
 # tfsec:ignore:aws-iam-no-policy-wildcards
 module "source" {
-  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-source?ref=0.3.9"
+  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-source?ref=0.3.10"
 
   # The destination bucket to repliaction the CUR data to
   destination_bucket_arn = module.collector.cur_bucket_arn
@@ -255,7 +255,7 @@ module "source" {
 
 ## Provision the cloud intelligence dashboards
 module "dashboards" {
-  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cid-dashboards?ref=0.3.9"
+  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cid-dashboards?ref=0.3.10"
 
   stack_name      = var.stack_name_cloud_intelligence
   template_bucket = module.dashboard_bucket.s3_bucket_id
