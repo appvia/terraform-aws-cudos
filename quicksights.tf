@@ -22,6 +22,10 @@ resource "aws_quicksight_user" "users" {
   user_name     = each.value.identity_type == "QUICKSIGHT" ? try(each.value.user_name, null) : null
   user_role     = try(each.value.role, null)
 
+  lifecycle {
+    ignore_changes = [user_name]
+  }
+
   provider = aws.cost_analysis
 }
 
