@@ -255,7 +255,7 @@ module "source" {
 
 ## Provision the stack contain the cora data exports in the management account 
 ## Deployment of same stacko the management account
-resource "aws_cloudformation_stack" "management" {
+resource "aws_cloudformation_stack" "core_data_export_management" {
   count = var.enable_cora_data_exports ? 1 : 0
 
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
@@ -277,6 +277,31 @@ resource "aws_cloudformation_stack" "management" {
   }
 
   provider = aws.management
+}
+
+## Provision the Cora data exports in the collector account 
+resource "aws_cloudformation_stack" "cora_data_export_collector" {
+  count = var.enable_cora_data_exports ? 1 : 0
+
+  capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
+  name         = var.stack_name_cora_data_exports
+  on_failure   = "ROLLBACK"
+  tags         = var.tags
+  template_url = format("%s/cudos/%s", local.stacks_base_url, "data-exports-aggregation.yaml")
+
+  parameters = {
+    "DestinationAccountId" = local.cost_analysis_account_id,
+    "EnableSCAD"           = var.enable_scad ? "yes" : "no",
+    "SourceAccountIds"     = local.management_account_id,
+  }
+
+  lifecycle {
+    ignore_changes = [
+      capabilities,
+    ]
+  }
+
+  provider = aws.cost_analysis
 }
 
 ## Provision the cloud intelligence dashboards
