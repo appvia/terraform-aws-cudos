@@ -259,7 +259,7 @@ resource "aws_cloudformation_stack" "core_data_export_management" {
   count = var.enable_cora_data_exports ? 1 : 0
 
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
-  name         = var.stack_name_cora_data_exports
+  name         = var.stack_name_cora_data_exports_source
   on_failure   = "ROLLBACK"
   tags         = var.tags
   template_url = format("%s/cudos/%s", local.stacks_base_url, "data-exports-aggregation.yaml")
@@ -284,7 +284,7 @@ resource "aws_cloudformation_stack" "cora_data_export_collector" {
   count = var.enable_cora_data_exports ? 1 : 0
 
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
-  name         = var.stack_name_cora_data_exports
+  name         = var.stack_name_cora_data_exports_destination
   on_failure   = "ROLLBACK"
   tags         = var.tags
   template_url = format("%s/cudos/%s", local.stacks_base_url, "data-exports-aggregation.yaml")
@@ -292,6 +292,8 @@ resource "aws_cloudformation_stack" "cora_data_export_collector" {
   parameters = {
     "DestinationAccountId" = local.cost_analysis_account_id,
     "EnableSCAD"           = var.enable_scad ? "yes" : "no",
+    "ManageCOH"            = "yes",
+    "ManageCUR2"           = "yes",
     "SourceAccountIds"     = local.management_account_id,
   }
 

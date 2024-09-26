@@ -64,10 +64,16 @@ variable "stack_name_collectors" {
   default     = "CidDataCollectionStack"
 }
 
-variable "stack_name_cora_data_exports" {
+variable "stack_name_cora_data_exports_source" {
   description = "The name of the CloudFormation stack to create the CORA Data Exports"
   type        = string
-  default     = "CidCoraCoraDataExportsStack"
+  default     = "CidCoraCoraDataExportsSourceStack"
+}
+
+variable "stack_name_cora_data_exports_destination" {
+  description = "The name of the CloudFormation stack to create the CORA Data Exports"
+  type        = string
+  default     = "CidCoraCoraDataExportsDestinationStack"
 }
 
 variable "dashboards_bucket_name" {
