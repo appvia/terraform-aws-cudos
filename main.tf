@@ -295,6 +295,7 @@ resource "aws_cloudformation_stack" "cora_data_export_collector" {
     "DestinationAccountId" = local.cost_analysis_account_id,
     "EnableSCAD"           = var.enable_scad ? "yes" : "no",
     "ManageCOH"            = "yes",
+    "ManageCUR2"           = "yes",
     "SourceAccountIds"     = local.management_account_id,
   }
 
