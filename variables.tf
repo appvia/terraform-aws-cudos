@@ -64,6 +64,18 @@ variable "stack_name_collectors" {
   default     = "CidDataCollectionStack"
 }
 
+variable "stack_name_cora_data_exports_source" {
+  description = "The name of the CloudFormation stack to create the CORA Data Exports"
+  type        = string
+  default     = "CidCoraCoraDataExportsSourceStack"
+}
+
+variable "stack_name_cora_data_exports_destination" {
+  description = "The name of the CloudFormation stack to create the CORA Data Exports"
+  type        = string
+  default     = "CidCoraCoraDataExportsDestinationStack"
+}
+
 variable "dashboards_bucket_name" {
   description = "The name of the bucket to store the dashboards configurations"
   type        = string
@@ -79,6 +91,12 @@ variable "enable_cost_anomaly_module" {
   description = "Indicates if the Cost Anomaly module should be enabled"
   type        = bool
   default     = true
+}
+
+variable "enable_scad" {
+  description = "Indicates if the SCAD module should be enabled, only available when Cora enabled"
+  type        = bool
+  default     = false
 }
 
 variable "enable_health_events" {
@@ -115,6 +133,12 @@ variable "enable_rds_utilization_module" {
   description = "Indicates if the RDS Utilization module should be enabled"
   type        = bool
   default     = true
+}
+
+variable "enable_cora_data_exports" {
+  description = "Indicates if the CORA Data Exports module should be enabled"
+  type        = bool
+  default     = false
 }
 
 variable "enable_rightsizing_module" {
