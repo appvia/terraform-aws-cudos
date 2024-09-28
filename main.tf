@@ -268,7 +268,7 @@ resource "aws_cloudformation_stack" "core_data_export_management" {
     "DestinationAccountId" = local.cost_analysis_account_id,
     "EnableSCAD"           = var.enable_scad ? "yes" : "no",
     "ManageCOH"            = "yes",
-    "ManageCUR2"           = "yes",
+    "ManageCUR2"           = "no",
     "SourceAccountIds"     = local.management_account_id,
   }
 
@@ -295,7 +295,7 @@ resource "aws_cloudformation_stack" "cora_data_export_collector" {
     "DestinationAccountId" = local.cost_analysis_account_id,
     "EnableSCAD"           = var.enable_scad ? "yes" : "no",
     "ManageCOH"            = "yes",
-    "ManageCUR2"           = "yes",
+    "ManageCUR2"           = "no",
     "SourceAccountIds"     = local.management_account_id,
   }
 
