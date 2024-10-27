@@ -30,3 +30,12 @@ terraform.rc
 .DS_Store
 todo.md
 
+# Ignore vim swap files 
+*.swp 
+*.swo 
+
+# Irgnore meld diff files 
+*.orig 
+*.backup 
+*.rej 
+
