@@ -1,4 +1,3 @@
-formatter: markdown
 #header-from: .header.md
 settings:
   anchor: true
@@ -12,10 +11,18 @@ settings:
   type: true
   lockfile: false
 
-sort:
-  enabled: true
-  by: required
+formatter: "markdown table"
 
 output:
   file: README.md
   mode: inject
+
+sections:
+  show:
+    - providers
+    - inputs
+    - outputs
+
+sort:
+  enabled: true
+  by: required
