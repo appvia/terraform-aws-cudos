@@ -4,6 +4,16 @@ variable "tags" {
   type        = map(string)
 }
 
+variable "management_account_id" {
+  description = "The AWS account ID for the management account"
+  type        = string
+}
+
+variable "cloudformation_bucket_url" {
+  description = "The name of the bucket to store the CloudFormation templates"
+  type        = string
+}
+
 variable "additional_payer_accounts" {
   description = "List of additional payer accounts to be included in the collectors module"
   type        = list(string)
@@ -40,34 +50,16 @@ variable "quicksight_subscription_account_name" {
   default     = null
 }
 
-variable "stacks_bucket_name" {
-  description = "The name of the bucket to store the CloudFormation templates"
-  type        = string
-  default     = "cid-cloudformation-templates"
-}
-
 variable "stack_name_cloud_intelligence" {
   description = "The name of the CloudFormation stack to create the dashboards"
   type        = string
   default     = "CI-Cloud-Intelligence-Dashboards"
 }
 
-variable "stack_name_read_permissions" {
-  description = "The name of the CloudFormation stack to create the collectors"
-  type        = string
-  default     = "CidDataCollectionReadPermissionsStack"
-}
-
 variable "stack_name_collectors" {
   description = "The name of the CloudFormation stack to create the collectors"
   type        = string
   default     = "CidDataCollectionStack"
-}
-
-variable "stack_name_cora_data_exports_source" {
-  description = "The name of the CloudFormation stack to create the CORA Data Exports"
-  type        = string
-  default     = "CidCoraCoraDataExportsSourceStack"
 }
 
 variable "stack_name_cora_data_exports_destination" {
