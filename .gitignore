@@ -34,8 +34,11 @@ todo.md
 *.swp 
 *.swo 
 
-# Irgnore meld diff files 
+# Ignore meld diff files 
 *.orig 
 *.backup 
 *.rej 
 
+# Ignore lambda zip files and build directories
+*.zip 
+builds/

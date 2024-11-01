@@ -2,7 +2,7 @@
 ##  https://raw.githubusercontent.com/awslabs/cid-framework/main/data-collection/deploy/deploy-data-collection.yaml
 #
 AWSTemplateFormatVersion: "2010-09-09"
-Description: CID Data Collection Stack v3.3.2
+Description: CID Data Collection Stack v3.4.3
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -26,6 +26,7 @@ Metadata:
           - IncludeBudgetsModule
           - IncludeComputeOptimizerModule
           - IncludeCostAnomalyModule
+          - IncludeSupportCasesModule
           - IncludeECSChargebackModule
           - IncludeHealthEventsModule
           - IncludeInventoryCollectorModule
@@ -36,6 +37,7 @@ Metadata:
           - IncludeTransitGatewayModule
           - IncludeAWSFeedsModule
           - IncludeLicenseManagerModule
+          - IncludeQuickSightModule
     ParameterLabels:
       DestinationBucket:
         default: "Destination S3 bucket prefix"
@@ -63,6 +65,8 @@ Metadata:
         default: "Include Rightsizing Recommendations Data Collection Module"
       IncludeCostAnomalyModule:
         default: "Include Cost Anomalies Data Collection Module"
+      IncludeSupportCasesModule:
+        default: "Include Support Cases Data Collection Module"
       IncludeInventoryCollectorModule:
         default: "Include Inventory Collector Module"
       IncludeComputeOptimizerModule:
@@ -85,6 +89,8 @@ Metadata:
         default: "Include AWS Health Events Module"
       IncludeLicenseManagerModule:
         default: "Include Marketplace Licensing Collection"
+      IncludeQuickSightModule:
+        default: "Include QuickSight User Collection Module"
 
 Mappings:
   RegionMap:
@@ -122,15 +128,15 @@ Mappings:
     us-west-2:
       { CodeBucket: aws-managed-cost-intelligence-dashboards-us-west-2 }
   StepFunctionCode:
-    main-v2:
+    main-v3:
       {
-        TemplatePath: cfn/data-collection/source/step-functions/main-state-machine-v2.json,
+        TemplatePath: cfn/data-collection/source/step-functions/main-state-machine-v3.json,
       }
     crawler-v1:
       {
         TemplatePath: cfn/data-collection/source/step-functions/crawler-state-machine-v1.json,
       }
-    awsfeeds-v1:
+    standalone-v1:
       {
         TemplatePath: cfn/data-collection/source/step-functions/awsfeeds-state-machine-v1.json,
       }
@@ -159,7 +165,7 @@ Parameters:
     Default: "rate(14 days)"
   ScheduleFrequent:
     Type: String
-    Description: EventBridge schedule to trigger data collection for Cost Anomalies, Budgets, and Health Events modules (see docs for tailoring the schedule for each module).
+    Description: EventBridge schedule to trigger data collection for Cost Anomalies, Budgets, Support Cases and Health Events modules (see docs for tailoring the schedule for each module).
     Default: "rate(1 day)"
   RegionsInScope:
     Type: String
@@ -192,6 +198,11 @@ Parameters:
   IncludeCostAnomalyModule:
     Type: String
     Description: "Collects AWS Cost Explorer Cost Anomalies Recommendations"
+    AllowedValues: ["yes", "no"]
+    Default: "no"
+  IncludeSupportCasesModule:
+    Type: String
+    Description: "Collects AWS Support Cases Data"
     AllowedValues: ["yes", "no"]
     Default: "no"
   IncludeInventoryCollectorModule:
@@ -249,11 +260,17 @@ Parameters:
     Description: Collects Marketplace Licenses and Grants
     AllowedValues: ["yes", "no"]
     Default: "no"
+  IncludeQuickSightModule:
+    Type: String
+    Description: Collects Marketplace Licenses and Grants
+    AllowedValues: ["yes", "no"]
+    Default: "no"
 
 Conditions:
   DeployTAModule: !Equals [!Ref IncludeTAModule, "yes"]
   DeployRightsizingModule: !Equals [!Ref IncludeRightsizingModule, "yes"]
   DeployCostAnomalyModule: !Equals [!Ref IncludeCostAnomalyModule, "yes"]
+  DeploySupportCasesModule: !Equals [!Ref IncludeSupportCasesModule, "yes"]
   DeployInventoryCollectorModule:
     !Equals [!Ref IncludeInventoryCollectorModule, "yes"]
   DeployComputeOptimizerModule:
@@ -267,6 +284,7 @@ Conditions:
   DeployAWSFeedsModule: !Equals [!Ref IncludeAWSFeedsModule, "yes"]
   DeployHealthEventsModule: !Equals [!Ref IncludeHealthEventsModule, "yes"]
   DeployLicenseManagerModule: !Equals [!Ref IncludeLicenseManagerModule, "yes"]
+  DeployQuickSightModule: !Equals [!Ref IncludeQuickSightModule, "yes"]
   DeployPricingModule: !Or
     - !Condition DeployInventoryCollectorModule
     - !Condition DeployRDSUtilizationModule
@@ -275,6 +293,7 @@ Conditions:
         - !Condition DeployTAModule
         - !Condition DeployRightsizingModule
         - !Condition DeployCostAnomalyModule
+        - !Condition DeploySupportCasesModule
         - !Condition DeployInventoryCollectorModule
         - !Condition DeployComputeOptimizerModule
         - !Condition DeployEcsChargebackModule
@@ -286,6 +305,7 @@ Conditions:
         - !Condition DeployTransitGatewayModule
         - !Condition DeployHealthEventsModule
         - !Condition DeployLicenseManagerModule
+        - !Condition DeployQuickSightModule
   RegionsInScopeIsEmpty: !Equals
     - !Join ["", !Split [" ", !Ref RegionsInScope]] # remove spaces
     - ""
@@ -464,7 +484,7 @@ Resources:
   LambdaAnalytics:
     Type: AWS::Lambda::Function
     Properties:
-      Runtime: python3.10
+      Runtime: python3.12
       FunctionName: !Sub ${ResourcePrefix}analytics-Lambda
       Description: "Lambda function to collect general deployment metrics"
       Handler: index.lambda_handler
@@ -560,7 +580,7 @@ Resources:
   LambdaInit:
     Type: AWS::Lambda::Function
     Properties:
-      Runtime: python3.10
+      Runtime: python3.12
       FunctionName: !Sub ${ResourcePrefix}init-Lambda
       Description: "Lambda function to initialize the stack"
       Handler: index.lambda_handler
@@ -684,7 +704,7 @@ Resources:
   LambdaManageGlueTable:
     Type: AWS::Lambda::Function
     Properties:
-      Runtime: python3.10
+      Runtime: python3.12
       FunctionName: !Sub ${ResourcePrefix}ManageGlueTable-Lambda
       Description: "Lambda function to manage glue tables"
       Handler: index.lambda_handler
@@ -801,7 +821,7 @@ Resources:
                 Action:
                   - glue:StartCrawler
                   - glue:GetCrawler
-                Resource: !Sub "arn:aws:glue:${AWS::Region}:${AWS::AccountId}:crawler/${ResourcePrefix}*Crawler*"
+                Resource: !Sub "arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:crawler/${ResourcePrefix}*Crawler*"
         - PolicyName: InvokeCollectionLambda
           PolicyDocument:
             Version: 2012-10-17
@@ -810,7 +830,7 @@ Resources:
                 Action:
                   - lambda:InvokeFunction
                 Resource:
-                  - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ResourcePrefix}*Lambda*"
+                  - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${ResourcePrefix}*Lambda*"
         - PolicyName: PolicyForSyncronousExecution
           PolicyDocument:
             Version: 2012-10-17
@@ -821,19 +841,19 @@ Resources:
                   - events:DescribeRule
                   - events:PutRule
                 Resource:
-                  - !Sub "arn:aws:events:${AWS::Region}:${AWS::AccountId}:rule/StepFunctionsGetEventsForStepFunctionsExecutionRule"
+                  - !Sub "arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/StepFunctionsGetEventsForStepFunctionsExecutionRule"
               - Effect: Allow
                 Action:
                   - states:StartExecution
                 Resource:
-                  - !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${ResourcePrefix}*-StateMachine"
+                  - !Sub "arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${ResourcePrefix}*-StateMachine"
               - Effect: Allow
                 Action:
                   - states:DescribeExecution
                   - states:StopExecution
                 Resource:
-                  - !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:execution:*:*"
-                  - !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:express:*:*:*"
+                  - !Sub "arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:execution:*:*"
+                  - !Sub "arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:express:*:*:*"
         - PolicyName: "S3-ReadOnlyAccess" #Used for getting summary record list for map iterations to retrieve detail API calls
           PolicyDocument:
             Version: "2012-10-17"
@@ -882,7 +902,7 @@ Resources:
                 Action:
                   - states:StartExecution
                 Resource:
-                  - !Sub "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${ResourcePrefix}*StateMachine"
+                  - !Sub "arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${ResourcePrefix}*StateMachine"
         - PolicyName: "ExecuteLambda"
           PolicyDocument:
             Version: 2012-10-17
@@ -891,7 +911,7 @@ Resources:
                 Action:
                   - lambda:InvokeFunction
                 Resource:
-                  - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ResourcePrefix}*"
+                  - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${ResourcePrefix}*"
 
   TrustedAdvisorModule:
     Type: AWS::CloudFormation::Stack
@@ -915,7 +935,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v3, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
 
@@ -941,7 +961,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v3, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
 
@@ -967,9 +987,35 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v3, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         LambdaManageGlueTableARN: !GetAtt LambdaManageGlueTable.Arn
+        SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
+
+  SupportCasesModule:
+    Type: AWS::CloudFormation::Stack
+    Condition: DeploySupportCasesModule
+    Properties:
+      TemplateURL: !Sub "https://${CFNSourceBucket}.s3.amazonaws.com/cfn/data-collection/module-support-cases.yaml"
+      Parameters:
+        DatabaseName: !Ref DatabaseName
+        DestinationBucket: !Ref S3Bucket
+        DestinationBucketARN: !GetAtt S3Bucket.Arn
+        MultiAccountRoleName: !Sub "${ResourcePrefix}${MultiAccountRoleName}"
+        Schedule: !Ref ScheduleFrequent
+        GlueRoleARN: !GetAtt GlueRole.Arn
+        ResourcePrefix: !Ref ResourcePrefix
+        LambdaAnalyticsARN: !GetAtt LambdaAnalytics.Arn
+        AccountCollectorLambdaARN: !Sub "${AccountCollector.Outputs.LambdaFunctionARN}"
+        CodeBucket:
+          !If [
+            ProdCFNTemplateUsed,
+            !FindInMap [RegionMap, !Ref "AWS::Region", CodeBucket],
+            !Ref CFNSourceBucket,
+          ]
+        StepFunctionTemplate:
+          !FindInMap [StepFunctionCode, main-v3, TemplatePath]
+        StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
 
   BackupModule:
@@ -994,7 +1040,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v3, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
 
@@ -1020,7 +1066,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v3, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         LambdaManageGlueTableARN: !GetAtt LambdaManageGlueTable.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
@@ -1083,7 +1129,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v3, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
 
@@ -1109,7 +1155,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v3, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
         RegionsInScope:
@@ -1140,7 +1186,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v3, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
         RegionsInScope:
@@ -1171,7 +1217,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v3, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
 
@@ -1197,7 +1243,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v3, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
 
@@ -1223,7 +1269,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v3, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
         RegionsInScope:
@@ -1252,7 +1298,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, awsfeeds-v1, TemplatePath]
+          !FindInMap [StepFunctionCode, standalone-v1, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
 
@@ -1278,7 +1324,7 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v3, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
 
@@ -1292,7 +1338,7 @@ Resources:
         DestinationBucket: !Ref S3Bucket
         DestinationBucketARN: !GetAtt S3Bucket.Arn
         ManagementRoleName: !Sub "${ResourcePrefix}${ManagementAccountRole}"
-        Schedule: !Ref Schedule
+        Schedule: !Ref ScheduleFrequent
         GlueRoleARN: !GetAtt GlueRole.Arn
         ResourcePrefix: !Ref ResourcePrefix
         LambdaAnalyticsARN: !GetAtt LambdaAnalytics.Arn
@@ -1304,7 +1350,31 @@ Resources:
             !Ref CFNSourceBucket,
           ]
         StepFunctionTemplate:
-          !FindInMap [StepFunctionCode, main-v2, TemplatePath]
+          !FindInMap [StepFunctionCode, main-v3, TemplatePath]
+        StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
+        SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
+
+  QuickSightModule:
+    Type: AWS::CloudFormation::Stack
+    Condition: DeployQuickSightModule
+    Properties:
+      TemplateURL: !Sub "https://${CFNSourceBucket}.s3.amazonaws.com/cfn/data-collection/module-quicksight.yaml"
+      Parameters:
+        DatabaseName: !Ref DatabaseName
+        DestinationBucket: !Ref S3Bucket
+        DestinationBucketARN: !GetAtt S3Bucket.Arn
+        Schedule: !Ref ScheduleFrequent
+        GlueRoleARN: !GetAtt GlueRole.Arn
+        ResourcePrefix: !Ref ResourcePrefix
+        LambdaAnalyticsARN: !GetAtt LambdaAnalytics.Arn
+        CodeBucket:
+          !If [
+            ProdCFNTemplateUsed,
+            !FindInMap [RegionMap, !Ref "AWS::Region", CodeBucket],
+            !Ref CFNSourceBucket,
+          ]
+        StepFunctionTemplate:
+          !FindInMap [StepFunctionCode, standalone-v1, TemplatePath]
         StepFunctionExecutionRoleARN: !GetAtt StepFunctionExecutionRole.Arn
         SchedulerExecutionRoleARN: !GetAtt SchedulerExecutionRole.Arn
 

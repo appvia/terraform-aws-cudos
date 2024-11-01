@@ -71,7 +71,7 @@ init:
 	@echo "--> Running terraform init"
 	@terraform init -backend=false
 
-security: 
+security: init
 	@echo "--> Running Security checks"
 	@trivy config .
 	$(MAKE) security-modules
@@ -81,6 +81,7 @@ security-modules:
 	@echo "--> Running Security checks on modules"
 	@find . -type d -regex '.*/modules/[a-zA-Z\-_$$]*' -not -path '*.terraform*' 2>/dev/null | while read -r dir; do \
 		echo "--> Validating $$dir"; \
+	  terraform init -backend=false; \
 		trivy config  --format table --exit-code  1 --severity  CRITICAL,HIGH --ignorefile .trivyignore $$dir; \
 	done; 
 
@@ -88,6 +89,7 @@ security-examples:
 	@echo "--> Running Security checks on examples"
 	@find . -type d -path '*/examples/*' -not -path '*.terraform*' 2>/dev/null | while read -r dir; do \
 		echo "--> Validating $$dir"; \
+	  terraform init -backend=false; \
 		trivy config  --format table --exit-code  1 --severity  CRITICAL,HIGH --ignorefile .trivyignore $$dir; \
 	done;
 
