@@ -7,8 +7,6 @@ resource "aws_quicksight_account_subscription" "subscription" {
   authentication_method = var.quicksight_subscription_authentication_method
   edition               = var.quicksight_subscription_edition
   notification_email    = var.quicksight_subscription_email
-
-  provider = aws.cost_analysis
 }
 
 ## Provision a SAML identity provider in the data collection account - this will be 
@@ -19,8 +17,6 @@ resource "aws_iam_saml_provider" "saml" {
   name                   = "aws-cudos-sso"
   saml_metadata_document = var.saml_metadata
   tags                   = var.tags
-
-  provider = aws.cost_analysis
 }
 
 ## Provision a trust policy for the above SAML identity provider 
@@ -65,53 +61,15 @@ resource "aws_iam_role" "cudos_sso" {
   name               = "aws-cudos-sso"
   assume_role_policy = data.aws_iam_policy_document.cudos_sso[0].json
   tags               = var.tags
-
-  inline_policy {
-    name   = "quicksight-permissions"
-    policy = data.aws_iam_policy_document.cudos_sso_permissions[0].json
-  }
-
-  provider = aws.cost_analysis
 }
 
-## Craft and IAM policy that allows the account to access the bucket 
-data "aws_iam_policy_document" "stack_bucket_policy" {
-  statement {
-    effect = "Allow"
-    actions = [
-      "s3:DeleteObject",
-      "s3:GetObject",
-      "s3:ListBucket",
-      "s3:PutObject",
-    ]
-    principals {
-      type        = "AWS"
-      identifiers = [local.management_account_id]
-    }
-    resources = [
-      format("arn:aws:s3:::%s", var.stacks_bucket_name),
-      format("arn:aws:s3:::%s/*", var.stacks_bucket_name),
-    ]
-  }
+## Attach an inline policy to the IAM role 
+resource "aws_iam_role_policy" "cudos_sso" {
+  count = var.enable_sso ? 1 : 0
 
-  statement {
-    effect = "Allow"
-    actions = [
-      "s3:GetObject",
-      "s3:ListBucket",
-    ]
-    principals {
-      type = "AWS"
-      identifiers = [
-        local.cost_analysis_account_id,
-        local.management_account_id,
-      ]
-    }
-    resources = [
-      format("arn:aws:s3:::%s", var.stacks_bucket_name),
-      format("arn:aws:s3:::%s/*", var.stacks_bucket_name),
-    ]
-  }
+  name   = "quicksight-permissions"
+  policy = data.aws_iam_policy_document.cudos_sso_permissions[0].json
+  role   = aws_iam_role.cudos_sso[0].name
 }
 
 ## Craft and IAM policy that allows the account to access the bucket
@@ -126,7 +84,7 @@ data "aws_iam_policy_document" "dashboards_bucket_policy" {
     ]
     principals {
       type        = "AWS"
-      identifiers = local.cloudformation_accounts_ids
+      identifiers = [local.account_id]
     }
     resources = [
       format("arn:aws:s3:::%s", var.dashboards_bucket_name),
@@ -135,54 +93,6 @@ data "aws_iam_policy_document" "dashboards_bucket_policy" {
   }
 }
 
-
-## Provision a bucket used to contain the cloudformation templates  
-# tfsec:ignore:aws-s3-enable-bucket-logging
-module "cloudformation_bucket" {
-  source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "4.1.2"
-
-  attach_policy           = true
-  block_public_acls       = true
-  block_public_policy     = true
-  bucket                  = var.stacks_bucket_name
-  expected_bucket_owner   = local.management_account_id
-  force_destroy           = true
-  ignore_public_acls      = true
-  object_ownership        = "BucketOwnerPreferred"
-  policy                  = data.aws_iam_policy_document.stack_bucket_policy.json
-  restrict_public_buckets = true
-  tags                    = var.tags
-
-  server_side_encryption_configuration = {
-    rule = {
-      apply_server_side_encryption_by_default = {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
-
-  versioning = {
-    enabled = true
-  }
-
-  providers = {
-    aws = aws.management
-  }
-}
-
-## Upload the cloudformation templates to the bucket 
-resource "aws_s3_object" "cloudformation_templates" {
-  for_each = fileset("${path.module}/assets/cloudformation/", "**/*.yaml")
-
-  bucket                 = module.cloudformation_bucket.s3_bucket_id
-  etag                   = filemd5("${path.module}/assets/cloudformation/${each.value}")
-  key                    = each.value
-  server_side_encryption = "AES256"
-  source                 = "${path.module}/assets/cloudformation/${each.value}"
-
-  provider = aws.management
-}
 
 ## Provision a bucket used to contain the cudos dashboards - note this
 ## bucket must be public due to the consuming tterraform module
@@ -196,7 +106,7 @@ module "dashboard_bucket" {
   block_public_acls       = true
   block_public_policy     = true
   bucket                  = var.dashboards_bucket_name
-  expected_bucket_owner   = local.cost_analysis_account_id
+  expected_bucket_owner   = local.account_id
   force_destroy           = true
   ignore_public_acls      = true
   object_ownership        = "BucketOwnerPreferred"
@@ -215,16 +125,12 @@ module "dashboard_bucket" {
   versioning = {
     enabled = true
   }
-
-  providers = {
-    aws = aws.cost_analysis
-  }
 }
 
 ## First we configure the collector to accept the CUR (Cost and Usage Report) from the source account 
 # tfsec:ignore:aws-s3-enable-bucket-logging
 module "collector" {
-  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-destination?ref=4.0.5"
+  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-destination?ref=4.0.2"
 
   # Source account whom will be replicating the CUR data to the collector account
   source_account_ids = local.payer_account_ids
@@ -232,53 +138,8 @@ module "collector" {
   create_cur = false
 
   providers = {
-    aws         = aws.cost_analysis
-    aws.useast1 = aws.cost_analysis_us_east_1
+    aws.useast1 = aws.us_east_1
   }
-}
-
-## Setup the replication from the management account to the collector account 
-## to receive the CUR data 
-# tfsec:ignore:aws-s3-enable-bucket-logging
-# tfsec:ignore:aws-iam-no-policy-wildcards
-module "source" {
-  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-source?ref=4.0.5"
-
-  # The destination bucket to repliaction the CUR data to
-  destination_bucket_arn = module.collector.cur_bucket_arn
-
-  providers = {
-    aws         = aws.management
-    aws.useast1 = aws.management_us_east_1
-  }
-}
-
-## Provision the stack contain the cora data exports in the management account 
-## Deployment of same stacko the management account
-resource "aws_cloudformation_stack" "core_data_export_management" {
-  count = var.enable_cora_data_exports ? 1 : 0
-
-  capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
-  name         = var.stack_name_cora_data_exports_source
-  on_failure   = "ROLLBACK"
-  tags         = var.tags
-  template_url = format("%s/cudos/%s", local.stacks_base_url, "data-exports-aggregation.yaml")
-
-  parameters = {
-    "DestinationAccountId" = local.cost_analysis_account_id,
-    "EnableSCAD"           = var.enable_scad ? "yes" : "no",
-    "ManageCOH"            = "yes",
-    "ManageCUR2"           = "no",
-    "SourceAccountIds"     = local.management_account_id,
-  }
-
-  lifecycle {
-    ignore_changes = [
-      capabilities,
-    ]
-  }
-
-  provider = aws.management
 }
 
 ## Provision the Cora data exports in the collector account 
@@ -289,14 +150,14 @@ resource "aws_cloudformation_stack" "cora_data_export_collector" {
   name         = var.stack_name_cora_data_exports_destination
   on_failure   = "ROLLBACK"
   tags         = var.tags
-  template_url = format("%s/cudos/%s", local.stacks_base_url, "data-exports-aggregation.yaml")
+  template_url = format("%s/cudos/%s", var.cloudformation_bucket_url, "data-exports-aggregation.yaml")
 
   parameters = {
-    "DestinationAccountId" = local.cost_analysis_account_id,
+    "DestinationAccountId" = local.account_id,
     "EnableSCAD"           = var.enable_scad ? "yes" : "no",
     "ManageCOH"            = "yes",
     "ManageCUR2"           = "no",
-    "SourceAccountIds"     = local.management_account_id,
+    "SourceAccountIds"     = local.account_id,
   }
 
   lifecycle {
@@ -304,13 +165,11 @@ resource "aws_cloudformation_stack" "cora_data_export_collector" {
       capabilities,
     ]
   }
-
-  provider = aws.cost_analysis
 }
 
 ## Provision the cloud intelligence dashboards
 module "dashboards" {
-  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cid-dashboards?ref=4.0.5"
+  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cid-dashboards?ref=4.0.2"
 
   stack_name      = var.stack_name_cloud_intelligence
   template_bucket = module.dashboard_bucket.s3_bucket_id
@@ -329,53 +188,15 @@ module "dashboards" {
 
   depends_on = [
     module.collector,
-    module.source,
     aws_quicksight_account_subscription.subscription,
   ]
-
-  providers = {
-    aws = aws.cost_analysis
-  }
-}
-
-## We need to provision the read permissions stack in the management account  
-resource "aws_cloudformation_stack" "cudos_read_permissions" {
-  name         = var.stack_name_read_permissions
-  capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
-  template_url = format("%s/cudos/%s", local.stacks_base_url, "deploy-data-read-permissions.yaml")
-
-  parameters = {
-    "AllowModuleReadInMgmt"           = "yes",
-    "DataCollectionAccountID"         = local.cost_analysis_account_id,
-    "IncludeBackupModule"             = var.enable_backup_module ? "yes" : "no",
-    "IncludeBudgetsModule"            = var.enable_budgets_module ? "yes" : "no",
-    "IncludeComputeOptimizerModule"   = var.enable_compute_optimizer_module ? "yes" : "no",
-    "IncludeCostAnomalyModule"        = var.enable_cost_anomaly_module ? "yes" : "no",
-    "IncludeECSChargebackModule"      = var.enable_ecs_chargeback_module ? "yes" : "no",
-    "IncludeHealthEventsModule"       = var.enable_health_events ? "yes" : "no"
-    "IncludeInventoryCollectorModule" = var.enable_inventory_module ? "yes" : "no",
-    "IncludeRDSUtilizationModule"     = var.enable_rds_utilization_module ? "yes" : "no",
-    "IncludeRightsizingModule"        = var.enable_rightsizing_module ? "yes" : "no",
-    "IncludeTAModule"                 = var.enable_tao_module ? "yes" : "no",
-    "IncludeTransitGatewayModule"     = var.enable_transit_gateway_module ? "yes" : "no",
-    "OrganizationalUnitIds"           = local.organization_root_id,
-  }
-
-  depends_on = [
-    aws_s3_object.cloudformation_templates,
-    module.collector,
-    module.dashboards,
-    module.source,
-  ]
-
-  provider = aws.management
 }
 
 ## We need to provision the data collection stack in the colletor account 
 resource "aws_cloudformation_stack" "cudos_data_collection" {
   name         = var.stack_name_collectors
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
-  template_url = format("%s/cudos/%s", local.stacks_base_url, "deploy-data-collection.yaml")
+  template_url = format("%s/cudos/%s", var.cloudformation_bucket_url, "deploy-data-collection.yaml")
 
   parameters = {
     "IncludeBackupModule"             = var.enable_backup_module ? "yes" : "no",
@@ -391,16 +212,11 @@ resource "aws_cloudformation_stack" "cudos_data_collection" {
     "IncludeRightsizingModule"        = var.enable_rightsizing_module ? "yes" : "no",
     "IncludeTAModule"                 = var.enable_tao_module ? "yes" : "no",
     "IncludeTransitGatewayModule"     = var.enable_transit_gateway_module ? "yes" : "no",
-    "ManagementAccountID"             = join(",", local.payer_account_ids),
+    "ManagementAccountID"             = local.management_account_id,
   }
 
   depends_on = [
-    aws_cloudformation_stack.cudos_read_permissions,
-    aws_s3_object.cloudformation_templates,
     module.collector,
     module.dashboards,
-    module.source,
   ]
-
-  provider = aws.cost_analysis
 }

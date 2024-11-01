@@ -6,8 +6,6 @@ resource "aws_quicksight_group" "groups" {
   description = each.value.description
   group_name  = each.key
   namespace   = each.value.namespace
-
-  provider = aws.cost_analysis
 }
 
 ## Provision any users within QuickSight 
@@ -25,8 +23,6 @@ resource "aws_quicksight_user" "users" {
   lifecycle {
     ignore_changes = [user_name]
   }
-
-  provider = aws.cost_analysis
 }
 
 ## Provision any group memberships within QuickSight
@@ -37,6 +33,4 @@ resource "aws_quicksight_group_membership" "members" {
   member_name = format("%s/%s", aws_iam_role.cudos_sso[0].name, each.value.user)
 
   depends_on = [aws_quicksight_user.users]
-
-  provider = aws.cost_analysis
 }
