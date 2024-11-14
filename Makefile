@@ -70,6 +70,10 @@ upgrade-terraform-example-providers:
 init: 
 	@echo "--> Running terraform init"
 	@terraform init -backend=false
+	@find . -type f -name "*.tf" -not -path '*.terraform*' -exec dirname {} \; | sort -u | while read -r dir; do \
+		echo "--> Running terraform init in $$dir"; \
+		terraform -chdir=$$dir init -backend=false; \
+	done;
 
 security: init
 	@echo "--> Running Security checks"
