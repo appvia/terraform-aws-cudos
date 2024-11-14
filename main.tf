@@ -140,7 +140,7 @@ data "aws_iam_policy_document" "dashboards_bucket_policy" {
 # tfsec:ignore:aws-s3-enable-bucket-logging
 module "cloudformation_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "4.1.2"
+  version = "4.2.2"
 
   attach_policy           = true
   block_public_acls       = true
@@ -190,7 +190,7 @@ resource "aws_s3_object" "cloudformation_templates" {
 # tfsec:ignore:aws-s3-enable-bucket-logging
 module "dashboard_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "4.1.2"
+  version = "4.2.2"
 
   attach_policy           = true
   block_public_acls       = true
