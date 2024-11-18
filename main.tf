@@ -126,7 +126,7 @@ data "aws_iam_policy_document" "dashboards_bucket_policy" {
     ]
     principals {
       type        = "AWS"
-      identifiers = [local.cost_analysis_account_id]
+      identifiers = concat([local.cost_analysis_account_id], local.payer_account_ids)
     }
     resources = [
       format("arn:aws:s3:::%s", var.dashboards_bucket_name),
