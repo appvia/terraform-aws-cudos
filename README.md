@@ -139,6 +139,11 @@ To enable the Cora Data Exports, please see https://catalog.workshops.aws/awscid
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_destination_bucket_arn"></a> [destination\_bucket\_arn](#output\_destination\_bucket\_arn) | The ARN of the destination bucket |
+| <a name="output_destination_bucket_name"></a> [destination\_bucket\_name](#output\_destination\_bucket\_name) | The name of the destination bucket |
+| <a name="output_destination_bucket_short_url"></a> [destination\_bucket\_short\_url](#output\_destination\_bucket\_short\_url) | The domain name of the destination bucket |
+| <a name="output_destination_bucket_website_url"></a> [destination\_bucket\_website\_url](#output\_destination\_bucket\_website\_url) | The URL for the destination bucket |
 <!-- END_TF_DOCS -->
 
