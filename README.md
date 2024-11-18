@@ -141,6 +141,10 @@ To enable the Cora Data Exports, please see https://catalog.workshops.aws/awscid
 
 | Name | Description |
 |------|-------------|
+| <a name="output_cloudformation_bucket_arn"></a> [cloudformation\_bucket\_arn](#output\_cloudformation\_bucket\_arn) | The ARN of the bucket to store the CloudFormation templates |
+| <a name="output_cloudformation_bucket_name"></a> [cloudformation\_bucket\_name](#output\_cloudformation\_bucket\_name) | The name of the bucket to store the CloudFormation templates |
+| <a name="output_cloudformation_bucket_short_url"></a> [cloudformation\_bucket\_short\_url](#output\_cloudformation\_bucket\_short\_url) | The domain name of the bucket to store the CloudFormation templates |
+| <a name="output_cloudformation_bucket_website_url"></a> [cloudformation\_bucket\_website\_url](#output\_cloudformation\_bucket\_website\_url) | The URL for the bucket to store the CloudFormation templates |
 | <a name="output_destination_account_id"></a> [destination\_account\_id](#output\_destination\_account\_id) | The account ID of the destination bucket |
 | <a name="output_destination_bucket_arn"></a> [destination\_bucket\_arn](#output\_destination\_bucket\_arn) | The ARN of the destination bucket |
 | <a name="output_destination_bucket_name"></a> [destination\_bucket\_name](#output\_destination\_bucket\_name) | The name of the destination bucket |
