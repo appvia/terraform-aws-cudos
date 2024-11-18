@@ -1,4 +1,97 @@
 
+## Craft and IAM policy that allows the account to access the bucket 
+data "aws_iam_policy_document" "bucket_policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:DeleteObject",
+      "s3:GetObject",
+      "s3:ListBucket",
+      "s3:PutObject",
+    ]
+    principals {
+      type        = "AWS"
+      identifiers = [local.account_id]
+    }
+    resources = [
+      format("arn:aws:s3:::%s", var.cloudformation_bucket_name),
+      format("arn:aws:s3:::%s/*", var.cloudformation_bucket_name),
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:GetObject",
+      "s3:ListBucket",
+    ]
+    principals {
+      type        = "AWS"
+      identifiers = [local.account_id]
+    }
+    resources = [
+      format("arn:aws:s3:::%s", var.cloudformation_bucket_name),
+      format("arn:aws:s3:::%s/*", var.cloudformation_bucket_name),
+    ]
+  }
+}
+
+## Provision a bucket used to contain the cloudformation templates  
+# tfsec:ignore:aws-s3-enable-bucket-logging
+module "cloudformation" {
+  source  = "terraform-aws-modules/s3-bucket/aws"
+  version = "4.2.2"
+
+  attach_policy           = true
+  block_public_acls       = true
+  block_public_policy     = true
+  bucket                  = var.cloudformation_bucket_name
+  expected_bucket_owner   = local.account_id
+  force_destroy           = true
+  ignore_public_acls      = true
+  object_ownership        = "BucketOwnerPreferred"
+  policy                  = data.aws_iam_policy_document.bucket_policy.json
+  restrict_public_buckets = true
+  tags                    = var.tags
+
+  server_side_encryption_configuration = {
+    rule = {
+      apply_server_side_encryption_by_default = {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+
+  versioning = {
+    enabled = true
+  }
+}
+
+## Create a lifecycle rule to old versions of the objects in the bucket 
+resource "aws_s3_bucket_lifecycle_configuration" "bucket_lifecycle" {
+  bucket = module.cloudformation.s3_bucket_id
+
+  rule {
+    id     = "DeleteOldVersions"
+    status = "Enabled"
+
+    noncurrent_version_expiration {
+      noncurrent_days = 90
+    }
+  }
+}
+
+## Upload the cloudformation templates to the bucket 
+resource "aws_s3_object" "cloudformation_templates" {
+  for_each = fileset("${path.module}/assets/cloudformation/", "**/*.yaml")
+
+  bucket                 = module.cloudformation.s3_bucket_id
+  etag                   = filemd5("${path.module}/assets/cloudformation/${each.value}")
+  key                    = each.value
+  server_side_encryption = "AES256"
+  source                 = "${path.module}/assets/cloudformation/${each.value}"
+}
+
 ## Provision enterprise quicksight if enabled 
 resource "aws_quicksight_account_subscription" "subscription" {
   count = var.enable_quicksight_subscription ? 1 : 0
@@ -93,14 +186,13 @@ data "aws_iam_policy_document" "dashboards_bucket_policy" {
   }
 }
 
-
 ## Provision a bucket used to contain the cudos dashboards - note this
 ## bucket must be public due to the consuming tterraform module
 #
 # tfsec:ignore:aws-s3-enable-bucket-logging
 module "dashboard_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "4.1.2"
+  version = "4.2.2"
 
   attach_policy           = true
   block_public_acls       = true
@@ -142,31 +234,6 @@ module "collector" {
   }
 }
 
-## Provision the Cora data exports in the collector account 
-resource "aws_cloudformation_stack" "cora_data_export_collector" {
-  count = var.enable_cora_data_exports ? 1 : 0
-
-  capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
-  name         = var.stack_name_cora_data_exports_destination
-  on_failure   = "ROLLBACK"
-  tags         = var.tags
-  template_url = format("%s/cudos/%s", var.cloudformation_bucket_url, "data-exports-aggregation.yaml")
-
-  parameters = {
-    "DestinationAccountId" = local.account_id,
-    "EnableSCAD"           = var.enable_scad ? "yes" : "no",
-    "ManageCOH"            = "yes",
-    "ManageCUR2"           = "no",
-    "SourceAccountIds"     = local.account_id,
-  }
-
-  lifecycle {
-    ignore_changes = [
-      capabilities,
-    ]
-  }
-}
-
 ## Provision the cloud intelligence dashboards
 module "dashboards" {
   source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cid-dashboards?ref=4.0.2"
@@ -196,7 +263,7 @@ module "dashboards" {
 resource "aws_cloudformation_stack" "cudos_data_collection" {
   name         = var.stack_name_collectors
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
-  template_url = format("%s/cudos/%s", var.cloudformation_bucket_url, "deploy-data-collection.yaml")
+  template_url = format("%s/cudos/%s", local.bucket_url, "deploy-data-collection.yaml")
 
   parameters = {
     "IncludeBackupModule"             = var.enable_backup_module ? "yes" : "no",

@@ -26,11 +26,8 @@ data "aws_iam_policy_document" "stack_bucket_policy" {
       "s3:ListBucket",
     ]
     principals {
-      type = "AWS"
-      identifiers = [
-        local.destination_account_id,
-        local.management_account_id,
-      ]
+      type        = "AWS"
+      identifiers = [local.management_account_id]
     }
     resources = [
       format("arn:aws:s3:::%s", var.stacks_bucket_name),

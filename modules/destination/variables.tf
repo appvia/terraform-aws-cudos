@@ -9,8 +9,8 @@ variable "management_account_id" {
   type        = string
 }
 
-variable "cloudformation_bucket_url" {
-  description = "The name of the bucket to store the CloudFormation templates"
+variable "cloudformation_bucket_name" {
+  description = "The name of the bucket to store the CloudFormation"
   type        = string
 }
 
