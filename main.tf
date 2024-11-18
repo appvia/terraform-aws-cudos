@@ -242,7 +242,7 @@ module "collector" {
 # tfsec:ignore:aws-s3-enable-bucket-logging
 # tfsec:ignore:aws-iam-no-policy-wildcards
 module "source" {
-  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-source?ref=4.0.2"
+  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-source?ref=4.0.5"
 
   # The destination bucket to repliaction the CUR data to
   destination_bucket_arn = module.collector.cur_bucket_arn
