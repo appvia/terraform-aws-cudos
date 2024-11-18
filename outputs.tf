@@ -1,12 +1,12 @@
 
 output "destination_bucket_name" {
   description = "The name of the destination bucket"
-  value       = module.cloudformation_bucket.s3_bucket_id
+  value       = module.collector.cur_bucket_name
 }
 
 output "destination_bucket_arn" {
   description = "The ARN of the destination bucket"
-  value       = format("arn:aws:s3:::%s", module.cloudformation_bucket.s3_bucket_id)
+  value       = module.collector.cur_bucket_arn
 }
 
 output "destination_bucket_short_url" {
