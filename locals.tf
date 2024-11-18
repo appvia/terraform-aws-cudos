@@ -22,7 +22,10 @@ locals {
     } if var.enable_sso
   ]...)
 
-  ## Is the payer account id used in the collection configuration 
+  ## Is the payer account id used in the collection configuration
   payer_account_ids = distinct(sort(concat([local.management_account_id], var.additional_payer_accounts)))
+
+  ## Is the list of accounts permitted to retrieve the cloudformation templates
+  cloudformation_accounts_ids = distinct(concat([local.management_account_id, local.cost_analysis_account_id], var.additional_payer_accounts))
 }
 
