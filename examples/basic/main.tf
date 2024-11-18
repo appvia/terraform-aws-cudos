@@ -33,7 +33,7 @@ module "source" {
 
   ## The account id for the destination below
   destination_account_id        = "1234343434"
-  destination_bucket_name       = module.destination.destination_bucket_name
+  destination_bucket_name       = module.destination.destination_bucket_arn
   enable_backup_module          = true
   enable_budgets_module         = true
   enable_cora_data_exports      = true
