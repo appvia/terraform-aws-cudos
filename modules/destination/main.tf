@@ -49,7 +49,7 @@ data "aws_iam_policy_document" "cudos_sso_permissions" {
   statement {
     actions   = ["quicksight:CreateReader"]
     effect    = "Allow"
-    resources = ["arn:aws:quicksight::${local.cost_analysis_account_id}:user/$${aws:userid}"]
+    resources = ["arn:aws:quicksight::${local.account_id}:user/$${aws:userid}"]
   }
 }
 
