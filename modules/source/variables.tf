@@ -9,8 +9,8 @@ variable "destination_account_id" {
   type        = string
 }
 
-variable "destination_bucket_name" {
-  description = "The name of the bucket where to replicate the data from the CUR"
+variable "destination_bucket_arn" {
+  description = "The ARN of the bucket where to replicate the data from the CUR"
   type        = string
 }
 

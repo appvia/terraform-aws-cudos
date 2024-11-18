@@ -89,7 +89,7 @@ module "source" {
   source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-source?ref=0.3.13"
 
   # The destination bucket to repliaction the CUR data to
-  destination_bucket_arn = format("arn:aws:s3:%s: %s:bucket/%s", local.region, local.destination_account_id, var.destination_bucket_name)
+  destination_bucket_arn = var.destination_bucket_arn
 
   providers = {
     aws.useast1 = aws.us_east_1
