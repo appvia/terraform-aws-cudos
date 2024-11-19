@@ -3,7 +3,7 @@ locals {
   ## Is the account id for the cost analysis account 
   account_id = data.aws_caller_identity.current.account_id
   ## Is the payer account id used in the collection configuration 
-  payer_account_ids = distinct(sort(concat([var.management_account_id], var.additional_payer_accounts)))
+  payer_account_ids = distinct(var.payer_accounts)
   ## The region where the stack is being deployed 
   region = data.aws_region.current.name
   ## The URL for the s3 bucket containing cloudformation scripts
