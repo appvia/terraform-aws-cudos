@@ -391,7 +391,7 @@ resource "aws_cloudformation_stack" "cudos_data_collection" {
     "IncludeRightsizingModule"        = var.enable_rightsizing_module ? "yes" : "no",
     "IncludeTAModule"                 = var.enable_tao_module ? "yes" : "no",
     "IncludeTransitGatewayModule"     = var.enable_transit_gateway_module ? "yes" : "no",
-    "ManagementAccountID"             = local.management_account_id,
+    "ManagementAccountID"             = join(",", local.payer_account_ids),
   }
 
   depends_on = [
