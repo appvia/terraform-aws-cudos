@@ -4,17 +4,12 @@ variable "tags" {
   type        = map(string)
 }
 
-variable "management_account_id" {
-  description = "The AWS account ID for the management account"
-  type        = string
-}
-
 variable "cloudformation_bucket_name" {
   description = "The name of the bucket to store the CloudFormation"
   type        = string
 }
 
-variable "additional_payer_accounts" {
+variable "payer_accounts" {
   description = "List of additional payer accounts to be included in the collectors module"
   type        = list(string)
   default     = []

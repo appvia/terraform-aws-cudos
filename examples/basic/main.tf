@@ -17,7 +17,7 @@ module "destination" {
   cloudformation_bucket_name = local.cloudformation_bucket_name
   dashboards_bucket_name     = local.dashboard_bucket_name
   enable_sso                 = true
-  management_account_id      = module.source.management_account_id
+  payer_accounts             = ["1234343434"]
   quicksights_username       = var.quicksights_username
   saml_metadata              = file("${path.module}/assets/saml-metadata.xml")
   tags                       = var.tags
