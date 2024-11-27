@@ -283,6 +283,7 @@ resource "aws_cloudformation_stack" "cudos_data_collection" {
   }
 
   depends_on = [
+    aws_s3_object.cloudformation_templates,
     module.collector,
     module.dashboards,
   ]
