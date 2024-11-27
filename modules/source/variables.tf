@@ -32,12 +32,6 @@ variable "stack_name_cora_data_exports_source" {
   default     = "CidCoraCoraDataExportsSourceStack"
 }
 
-variable "enable_read_permissions_stack" {
-  description = "Indicates if the read permissions are deployed to all linked accounts"
-  type        = bool
-  default     = false
-}
-
 variable "enable_cost_anomaly_module" {
   description = "Indicates if the Cost Anomaly module should be enabled"
   type        = bool
