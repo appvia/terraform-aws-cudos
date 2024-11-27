@@ -32,12 +32,6 @@ variable "stack_name_cora_data_exports_source" {
   default     = "CidCoraCoraDataExportsSourceStack"
 }
 
-variable "enable_read_permissions_stack" {
-  description = "Indicates if the read permissions are deployed to all linked accounts"
-  type        = bool
-  default     = false
-}
-
 variable "enable_cost_anomaly_module" {
   description = "Indicates if the Cost Anomaly module should be enabled"
   type        = bool
@@ -114,4 +108,10 @@ variable "enable_rightsizing_module" {
   description = "Indicates if the Rightsizing module should be enabled"
   type        = bool
   default     = true
+}
+
+variable "organization_unit_ids" {
+  description = "List of organization units where the read permissions stack will be deployed"
+  type        = list(string)
+  default     = []
 }

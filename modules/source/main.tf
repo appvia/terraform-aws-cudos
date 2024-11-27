@@ -123,8 +123,6 @@ resource "aws_cloudformation_stack" "core_data_export_management" {
 ## this effectively creates a stackset which is deployed to all accounts within the
 ## organization
 resource "aws_cloudformation_stack" "cudos_read_permissions" {
-  count = var.enable_read_permissions_stack ? 1 : 0
-
   name         = var.stack_name_read_permissions
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
   template_url = format("%s/cudos/%s", local.stacks_base_url, "deploy-data-read-permissions.yaml")
@@ -143,7 +141,7 @@ resource "aws_cloudformation_stack" "cudos_read_permissions" {
     "IncludeRightsizingModule"        = var.enable_rightsizing_module ? "yes" : "no",
     "IncludeTAModule"                 = var.enable_tao_module ? "yes" : "no",
     "IncludeTransitGatewayModule"     = var.enable_transit_gateway_module ? "yes" : "no",
-    "OrganizationalUnitIds"           = local.organization_root_id,
+    "OrganizationalUnitIds"           = var.organizational_unit_ids,
   }
 
   depends_on = [
