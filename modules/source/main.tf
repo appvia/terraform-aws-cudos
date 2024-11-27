@@ -1,5 +1,5 @@
 
-## Craft and IAM policy that allows the account to access the bucket 
+## Craft and IAM policy that allows the account to access the bucket
 data "aws_iam_policy_document" "stack_bucket_policy" {
   statement {
     effect = "Allow"
@@ -36,7 +36,7 @@ data "aws_iam_policy_document" "stack_bucket_policy" {
   }
 }
 
-## Provision a bucket used to contain the cloudformation templates  
+## Provision a bucket used to contain the cloudformation templates
 # tfsec:ignore:aws-s3-enable-bucket-logging
 module "cloudformation_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
@@ -67,7 +67,7 @@ module "cloudformation_bucket" {
   }
 }
 
-## Upload the cloudformation templates to the bucket 
+## Upload the cloudformation templates to the bucket
 resource "aws_s3_object" "cloudformation_templates" {
   for_each = fileset("${path.module}/assets/cloudformation/", "**/*.yaml")
 
@@ -78,8 +78,8 @@ resource "aws_s3_object" "cloudformation_templates" {
   source                 = "${path.module}/assets/cloudformation/${each.value}"
 }
 
-## Setup the replication from the management account to the collector account 
-## to receive the CUR data 
+## Setup the replication from the management account to the collector account
+## to receive the CUR data
 # tfsec:ignore:aws-s3-enable-bucket-logging
 # tfsec:ignore:aws-iam-no-policy-wildcards
 module "source" {
@@ -93,7 +93,7 @@ module "source" {
   }
 }
 
-## Provision the stack contain the cora data exports in the management account 
+## Provision the stack contain the cora data exports in the management account
 ## Deployment of same stack the management account
 resource "aws_cloudformation_stack" "core_data_export_management" {
   count = var.enable_cora_data_exports ? 1 : 0
@@ -119,7 +119,9 @@ resource "aws_cloudformation_stack" "core_data_export_management" {
   }
 }
 
-## We need to provision the read permissions stack in the management account  
+## We need to provision the read permissions stack within the management account, note
+## this effectively creates a stackset which is deployed to all accounts within the
+## organization
 resource "aws_cloudformation_stack" "cudos_read_permissions" {
   name         = var.stack_name_read_permissions
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
@@ -139,7 +141,7 @@ resource "aws_cloudformation_stack" "cudos_read_permissions" {
     "IncludeRightsizingModule"        = var.enable_rightsizing_module ? "yes" : "no",
     "IncludeTAModule"                 = var.enable_tao_module ? "yes" : "no",
     "IncludeTransitGatewayModule"     = var.enable_transit_gateway_module ? "yes" : "no",
-    "OrganizationalUnitIds"           = local.organization_root_id,
+    "OrganizationalUnitIds"           = var.organizational_unit_ids,
   }
 
   depends_on = [
