@@ -1,5 +1,5 @@
 
-## Craft and IAM policy that allows the account to access the bucket 
+## Craft and IAM policy that allows the account to access the bucket
 data "aws_iam_policy_document" "bucket_policy" {
   statement {
     effect = "Allow"
@@ -36,7 +36,7 @@ data "aws_iam_policy_document" "bucket_policy" {
   }
 }
 
-## Provision a bucket used to contain the cloudformation templates  
+## Provision a bucket used to contain the cloudformation templates
 # tfsec:ignore:aws-s3-enable-bucket-logging
 module "cloudformation" {
   source  = "terraform-aws-modules/s3-bucket/aws"
@@ -67,7 +67,7 @@ module "cloudformation" {
   }
 }
 
-## Create a lifecycle rule to old versions of the objects in the bucket 
+## Create a lifecycle rule to old versions of the objects in the bucket
 resource "aws_s3_bucket_lifecycle_configuration" "bucket_lifecycle" {
   bucket = module.cloudformation.s3_bucket_id
 
@@ -81,7 +81,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket_lifecycle" {
   }
 }
 
-## Upload the cloudformation templates to the bucket 
+## Upload the cloudformation templates to the bucket
 resource "aws_s3_object" "cloudformation_templates" {
   for_each = fileset("${path.module}/assets/cloudformation/", "**/*.yaml")
 
@@ -92,7 +92,7 @@ resource "aws_s3_object" "cloudformation_templates" {
   source                 = "${path.module}/assets/cloudformation/${each.value}"
 }
 
-## Provision enterprise quicksight if enabled 
+## Provision enterprise quicksight if enabled
 resource "aws_quicksight_account_subscription" "subscription" {
   count = var.enable_quicksight_subscription ? 1 : 0
 
@@ -102,8 +102,8 @@ resource "aws_quicksight_account_subscription" "subscription" {
   notification_email    = var.quicksight_subscription_email
 }
 
-## Provision a SAML identity provider in the data collection account - this will be 
-## used to authenticate sso users into quicksights 
+## Provision a SAML identity provider in the data collection account - this will be
+## used to authenticate sso users into quicksights
 resource "aws_iam_saml_provider" "saml" {
   count = var.enable_sso ? 1 : 0
 
@@ -112,7 +112,7 @@ resource "aws_iam_saml_provider" "saml" {
   tags                   = var.tags
 }
 
-## Provision a trust policy for the above SAML identity provider 
+## Provision a trust policy for the above SAML identity provider
 data "aws_iam_policy_document" "cudos_sso" {
   count = var.enable_sso ? 1 : 0
 
@@ -133,9 +133,9 @@ data "aws_iam_policy_document" "cudos_sso" {
   }
 }
 
-## Provision an IAM policy which will be attached to the IAM role and has the 
-## necessary permissions to access quicksight users, whom have authenticated via 
-## the SAML identity provider 
+## Provision an IAM policy which will be attached to the IAM role and has the
+## necessary permissions to access quicksight users, whom have authenticated via
+## the SAML identity provider
 data "aws_iam_policy_document" "cudos_sso_permissions" {
   count = var.enable_sso ? 1 : 0
 
@@ -147,7 +147,7 @@ data "aws_iam_policy_document" "cudos_sso_permissions" {
 }
 
 ## Provision and IAM role to be assumed by the SAML identity provider; this role will
-## be used to authenticate users into quicksights 
+## be used to authenticate users into quicksights
 resource "aws_iam_role" "cudos_sso" {
   count = var.enable_sso ? 1 : 0
 
@@ -156,7 +156,7 @@ resource "aws_iam_role" "cudos_sso" {
   tags               = var.tags
 }
 
-## Attach an inline policy to the IAM role 
+## Attach an inline policy to the IAM role
 resource "aws_iam_role_policy" "cudos_sso" {
   count = var.enable_sso ? 1 : 0
 
@@ -219,7 +219,7 @@ module "dashboard_bucket" {
   }
 }
 
-## First we configure the collector to accept the CUR (Cost and Usage Report) from the source account 
+## First we configure the collector to accept the CUR (Cost and Usage Report) from the source account
 # tfsec:ignore:aws-s3-enable-bucket-logging
 module "collector" {
   source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-destination?ref=4.0.2"
@@ -259,7 +259,7 @@ module "dashboards" {
   ]
 }
 
-## We need to provision the data collection stack in the colletor account 
+## We need to provision the data collection stack in the colletor account
 resource "aws_cloudformation_stack" "cudos_data_collection" {
   name         = var.stack_name_collectors
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
@@ -287,3 +287,30 @@ resource "aws_cloudformation_stack" "cudos_data_collection" {
     module.dashboards,
   ]
 }
+
+## Provision the stack contain the cora data exports in the management account
+## Deployment of same stack the management account
+resource "aws_cloudformation_stack" "core_data_export_destination" {
+  count = var.enable_cora_data_exports ? 1 : 0
+
+  capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
+  name         = var.stack_name_cora_data_exports
+  on_failure   = "ROLLBACK"
+  tags         = var.tags
+  template_url = format("%s/cudos/%s", local.bucket_url, "data-exports-aggregation.yaml")
+
+  parameters = {
+    "DestinationAccountId" = local.account_id,
+    "EnableSCAD"           = var.enable_scad ? "yes" : "no",
+    "ManageCOH"            = "yes",
+    "ManageCUR2"           = "no",
+    "SourceAccountIds"     = join(",", local.payer_account_ids),
+  }
+
+  lifecycle {
+    ignore_changes = [
+      capabilities,
+    ]
+  }
+}
+
