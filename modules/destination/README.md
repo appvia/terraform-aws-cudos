@@ -48,7 +48,7 @@
 | <a name="input_saml_metadata"></a> [saml\_metadata](#input\_saml\_metadata) | The configuration for the SAML identity provider | `string` | `null` | no |
 | <a name="input_stack_name_cloud_intelligence"></a> [stack\_name\_cloud\_intelligence](#input\_stack\_name\_cloud\_intelligence) | The name of the CloudFormation stack to create the dashboards | `string` | `"CI-Cloud-Intelligence-Dashboards"` | no |
 | <a name="input_stack_name_collectors"></a> [stack\_name\_collectors](#input\_stack\_name\_collectors) | The name of the CloudFormation stack to create the collectors | `string` | `"CidDataCollectionStack"` | no |
-| <a name="input_stack_name_cora_data_exports_destination"></a> [stack\_name\_cora\_data\_exports\_destination](#input\_stack\_name\_cora\_data\_exports\_destination) | The name of the CloudFormation stack to create the CORA Data Exports | `string` | `"CidCoraCoraDataExportsDestinationStack"` | no |
+| <a name="input_stack_name_cora_data_exports"></a> [stack\_name\_cora\_data\_exports](#input\_stack\_name\_cora\_data\_exports) | The name of the CloudFormation stack to create the CORA Data Exports | `string` | `"CidCoraCoraDataExportsDestinationStack"` | no |
 
 ## Outputs
 
