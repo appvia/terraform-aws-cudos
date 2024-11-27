@@ -25,6 +25,7 @@
 | <a name="input_enable_scad"></a> [enable\_scad](#input\_enable\_scad) | Indicates if the SCAD module should be enabled, only available when Cora enabled | `bool` | `false` | no |
 | <a name="input_enable_tao_module"></a> [enable\_tao\_module](#input\_enable\_tao\_module) | Indicates if the TAO module should be enabled | `bool` | `true` | no |
 | <a name="input_enable_transit_gateway_module"></a> [enable\_transit\_gateway\_module](#input\_enable\_transit\_gateway\_module) | Indicates if the Transit Gateway module should be enabled | `bool` | `true` | no |
+| <a name="input_organization_unit_ids"></a> [organization\_unit\_ids](#input\_organization\_unit\_ids) | List of organization units where the read permissions stack will be deployed | `list(string)` | `[]` | no |
 | <a name="input_stack_name_cora_data_exports_source"></a> [stack\_name\_cora\_data\_exports\_source](#input\_stack\_name\_cora\_data\_exports\_source) | The name of the CloudFormation stack to create the CORA Data Exports | `string` | `"CidCoraCoraDataExportsSourceStack"` | no |
 | <a name="input_stack_name_read_permissions"></a> [stack\_name\_read\_permissions](#input\_stack\_name\_read\_permissions) | The name of the CloudFormation stack to create the collectors | `string` | `"CidDataCollectionReadPermissionsStack"` | no |
 | <a name="input_stacks_bucket_name"></a> [stacks\_bucket\_name](#input\_stacks\_bucket\_name) | The name of the bucket to store the CloudFormation templates | `string` | `"cid-cloudformation-templates"` | no |
