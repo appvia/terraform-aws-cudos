@@ -110,7 +110,7 @@ variable "enable_rightsizing_module" {
   default     = true
 }
 
-variable "organization_unit_ids" {
+variable "organizational_unit_ids" {
   description = "List of organization units where the read permissions stack will be deployed"
   type        = list(string)
   default     = []
