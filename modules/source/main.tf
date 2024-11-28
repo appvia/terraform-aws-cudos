@@ -83,7 +83,7 @@ resource "aws_s3_object" "cloudformation_templates" {
 # tfsec:ignore:aws-s3-enable-bucket-logging
 # tfsec:ignore:aws-iam-no-policy-wildcards
 module "source" {
-  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-source?ref=0.3.13"
+  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-source?ref=4.0.2"
 
   # The destination bucket to repliaction the CUR data to
   destination_bucket_arn = var.destination_bucket_arn
