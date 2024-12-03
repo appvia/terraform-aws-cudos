@@ -109,7 +109,6 @@ resource "aws_quicksight_user" "admin" {
   email         = var.quicksight_admin_email
   identity_type = "QUICKSIGHT"
   namespace     = "default"
-  session_name  = var.quicksight_admin_username
   user_name     = var.quicksight_admin_username
   user_role     = "ADMIN"
 }
