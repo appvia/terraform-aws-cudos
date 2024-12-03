@@ -5,9 +5,9 @@
 #####################################################################################
 
 locals {
-  ## Name of the bucket where the cloudformation scripts are stored 
+  ## Name of the bucket where the cloudformation scripts are stored
   cloudformation_bucket_name = "cid-cloudformation-templates"
-  ## Name of the bucket where the dashboards are stored 
+  ## Name of the bucket where the dashboards are stored
   dashboard_bucket_name = "cid-dashboards"
 }
 
@@ -36,7 +36,6 @@ module "source" {
   destination_bucket_arn        = module.destination.destination_bucket_arn
   enable_backup_module          = true
   enable_budgets_module         = true
-  enable_cora_data_exports      = true
   enable_ecs_chargeback_module  = true
   enable_health_events_module   = true
   enable_inventory_module       = true

@@ -99,7 +99,7 @@ module "source" {
 ## Deployment of same stack the management account
 resource "aws_cloudformation_stack" "core_data_export_management" {
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
-  name         = var.stack_name_cora_data_exports_source
+  name         = var.stack_name_data_exports_source
   on_failure   = "ROLLBACK"
   tags         = var.tags
   template_url = format("%s/cudos/%s", local.stacks_base_url, "data-exports-aggregation.yaml")

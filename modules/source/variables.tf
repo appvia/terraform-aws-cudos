@@ -26,10 +26,10 @@ variable "stack_name_read_permissions" {
   default     = "CidDataCollectionReadPermissionsStack"
 }
 
-variable "stack_name_cora_data_exports_source" {
+variable "stack_name_data_exports_source" {
   description = "The name of the CloudFormation stack to create the CORA Data Exports"
   type        = string
-  default     = "CidCoraCoraDataExportsSourceStack"
+  default     = "CidDataExportsSourceStack"
 }
 
 variable "enable_cost_anomaly_module" {
