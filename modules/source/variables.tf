@@ -27,7 +27,7 @@ variable "stack_name_read_permissions" {
 }
 
 variable "stack_name_data_exports_source" {
-  description = "The name of the CloudFormation stack to create the CORA Data Exports"
+  description = "The name of the CloudFormation stack to create the Data Exports"
   type        = string
   default     = "CidDataExportsSourceStack"
 }
