@@ -276,7 +276,7 @@ resource "aws_cloudformation_stack" "cudos_data_collection" {
     "IncludeComputeOptimizerModule"   = var.enable_compute_optimizer_module ? "yes" : "no",
     "IncludeCostAnomalyModule"        = var.enable_cost_anomaly_module ? "yes" : "no",
     "IncludeECSChargebackModule"      = var.enable_ecs_chargeback_module ? "yes" : "no",
-    "IncludeHealthEventsModule"       = var.enable_health_events ? "yes" : "no"
+    "IncludeHealthEventsModule"       = var.enable_health_events_module ? "yes" : "no"
     "IncludeInventoryCollectorModule" = var.enable_inventory_module ? "yes" : "no",
     "IncludeLicenseManagerModule"     = var.enable_license_manager_module ? "yes" : "no",
     "IncludeOrgDataModule"            = var.enable_org_data_module ? "yes" : "no",

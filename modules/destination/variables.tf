@@ -86,7 +86,7 @@ variable "enable_scad" {
   default     = false
 }
 
-variable "enable_health_events" {
+variable "enable_health_events_module" {
   description = "Indicates if the Health Events module should be enabled"
   type        = bool
   default     = true
