@@ -257,8 +257,9 @@ module "dashboards" {
   }
 
   depends_on = [
-    module.collector,
+    aws_cloudformation_stack.core_data_export_destination,
     aws_quicksight_account_subscription.subscription,
+    module.collector,
   ]
 }
 
