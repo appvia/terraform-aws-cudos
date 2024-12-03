@@ -102,6 +102,18 @@ resource "aws_quicksight_account_subscription" "subscription" {
   notification_email    = var.quicksight_subscription_email
 }
 
+## Provision a administator user in quicksight
+resource "aws_quicksight_user" "admin" {
+  count = local.enable_admin ? 1 : 0
+
+  email         = var.quicksight_admin_email
+  identity_type = "QUICKSIGHT"
+  namespace     = "default"
+  session_name  = var.quicksight_admin_username
+  user_name     = var.quicksight_admin_username
+  user_role     = "ADMIN"
+}
+
 ## Provision a SAML identity provider in the data collection account - this will be
 ## used to authenticate sso users into quicksights
 resource "aws_iam_saml_provider" "saml" {
@@ -234,6 +246,10 @@ module "collector" {
   providers = {
     aws.useast1 = aws.us_east_1
   }
+
+  depends_on = [
+    aws_quicksight_user.admin
+  ]
 }
 
 ## Provision the cloud intelligence dashboards
@@ -259,6 +275,7 @@ module "dashboards" {
   depends_on = [
     aws_cloudformation_stack.core_data_export_destination,
     aws_quicksight_account_subscription.subscription,
+    aws_quicksight_user.admin,
     module.collector,
   ]
 }

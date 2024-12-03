@@ -68,6 +68,24 @@ variable "dashboards_bucket_name" {
   type        = string
 }
 
+variable "enable_quicksight_admin" {
+  description = "Enable the creation of an admin user (var.quicksights_username) in QuickSight"
+  type        = bool
+  default     = true
+}
+
+variable "quicksight_admin_username" {
+  description = "The username for the QuickSight admin user"
+  type        = string
+  default     = "admin"
+}
+
+variable "quicksight_admin_email" {
+  description = "The email address for the QuickSight admin user"
+  type        = string
+  default     = null
+}
+
 variable "enable_sso" {
   description = "Enable integration with identity center for QuickSight"
   type        = bool

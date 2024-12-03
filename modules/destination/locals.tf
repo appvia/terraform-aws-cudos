@@ -1,13 +1,15 @@
 
 locals {
-  ## Is the account id for the cost analysis account 
+  ## Is the account id for the cost analysis account
   account_id = data.aws_caller_identity.current.account_id
-  ## Is the payer account id used in the collection configuration 
+  ## Is the payer account id used in the collection configuration
   payer_account_ids = distinct(var.payer_accounts)
-  ## The region where the stack is being deployed 
+  ## The region where the stack is being deployed
   region = data.aws_region.current.name
   ## The URL for the s3 bucket containing cloudformation scripts
   bucket_url = format("https://%s.s3.%s.amazonaws.com", var.cloudformation_bucket_name, local.region)
+  ## Indicates if we should provision the quicksight admin user
+  enable_admin = var.enable_quicksight_admin && var.quicksight_admin_email != null
 
   ## Is the user mappings for the quicksight groups
   user_group_mappings = merge([
