@@ -332,5 +332,10 @@ resource "aws_cloudformation_stack" "core_data_export_destination" {
       capabilities,
     ]
   }
+
+  depends_on = [
+    aws_s3_object.cloudformation_templates,
+    module.collector,
+  ]
 }
 
