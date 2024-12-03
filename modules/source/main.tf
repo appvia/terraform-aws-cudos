@@ -97,7 +97,7 @@ module "source" {
 
 ## Provision the stack contain the cora data exports in the management account
 ## Deployment of same stack the management account
-resource "aws_cloudformation_stack" "core_data_export_management" {
+resource "aws_cloudformation_stack" "data_export_management" {
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
   name         = var.stack_name_data_exports_source
   on_failure   = "ROLLBACK"
@@ -105,7 +105,7 @@ resource "aws_cloudformation_stack" "core_data_export_management" {
   template_url = format("%s/cudos/%s", local.stacks_base_url, "data-exports-aggregation.yaml")
 
   parameters = {
-    "DestinationAccountId" = local.destination_account_id,
+    "DestinationAccountId" = var.destination_account_id,
     "EnableSCAD"           = var.enable_scad ? "yes" : "no",
     "ManageCOH"            = var.enable_compute_optimizization_hub ? "yes" : "no",
     "ManageCUR2"           = "yes",
@@ -116,6 +116,11 @@ resource "aws_cloudformation_stack" "core_data_export_management" {
       capabilities,
     ]
   }
+
+  depends_on = [
+    aws_s3_object.cloudformation_templates,
+    module.source,
+  ]
 }
 
 ## We need to provision the read permissions stack within the management account, note
@@ -131,7 +136,7 @@ resource "aws_cloudformation_stack" "cudos_read_permissions" {
 
   parameters = {
     "AllowModuleReadInMgmt"           = "yes",
-    "DataCollectionAccountID"         = local.destination_account_id,
+    "DataCollectionAccountID"         = var.destination_account_id,
     "IncludeBackupModule"             = var.enable_backup_module ? "yes" : "no",
     "IncludeBudgetsModule"            = var.enable_budgets_module ? "yes" : "no",
     "IncludeComputeOptimizerModule"   = var.enable_compute_optimizer_module ? "yes" : "no",
