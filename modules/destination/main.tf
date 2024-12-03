@@ -228,6 +228,8 @@ module "collector" {
   source_account_ids = local.payer_account_ids
   # Indicates if we should create CUR data in the cost analysis account
   create_cur = false
+  # Adding the tags to the resources
+  tags = var.tags
 
   providers = {
     aws.useast1 = aws.us_east_1
@@ -239,6 +241,7 @@ module "dashboards" {
   source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cid-dashboards?ref=4.0.2"
 
   stack_name      = var.stack_name_cloud_intelligence
+  stack_tags      = var.tags
   template_bucket = module.dashboard_bucket.s3_bucket_id
 
   stack_parameters = {
@@ -263,6 +266,7 @@ module "dashboards" {
 resource "aws_cloudformation_stack" "cudos_data_collection" {
   name         = var.stack_name_collectors
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
+  tags         = var.tags
   template_url = format("%s/cudos/%s", local.bucket_url, "deploy-data-collection.yaml")
 
   parameters = {
