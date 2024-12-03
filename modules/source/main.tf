@@ -87,6 +87,8 @@ module "source" {
 
   # The destination bucket to repliaction the CUR data to
   destination_bucket_arn = var.destination_bucket_arn
+  # Adding the resource tags to all resources created by this module
+  tags = var.tags
 
   providers = {
     aws.useast1 = aws.us_east_1
@@ -125,6 +127,7 @@ resource "aws_cloudformation_stack" "core_data_export_management" {
 resource "aws_cloudformation_stack" "cudos_read_permissions" {
   name         = var.stack_name_read_permissions
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
+  tags         = var.tags
   template_url = format("%s/cudos/%s", local.stacks_base_url, "deploy-data-read-permissions.yaml")
 
   parameters = {
