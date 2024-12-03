@@ -122,12 +122,6 @@ variable "enable_rds_utilization_module" {
   default     = true
 }
 
-variable "enable_cora_data_exports" {
-  description = "Indicates if the CORA Data Exports module should be enabled"
-  type        = bool
-  default     = false
-}
-
 variable "enable_rightsizing_module" {
   description = "Indicates if the Rightsizing module should be enabled"
   type        = bool

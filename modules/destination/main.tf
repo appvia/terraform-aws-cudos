@@ -296,8 +296,6 @@ resource "aws_cloudformation_stack" "cudos_data_collection" {
 ## Provision the stack contain the cora data exports in the management account
 ## Deployment of same stack the management account
 resource "aws_cloudformation_stack" "core_data_export_destination" {
-  count = var.enable_cora_data_exports ? 1 : 0
-
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
   name         = var.stack_name_cora_data_exports
   on_failure   = "ROLLBACK"
