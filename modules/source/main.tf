@@ -125,6 +125,8 @@ resource "aws_cloudformation_stack" "core_data_export_management" {
 ## this effectively creates a stackset which is deployed to all accounts within the
 ## organization
 resource "aws_cloudformation_stack" "cudos_read_permissions" {
+  count = local.enable_read_permissions ? 1 : 0
+
   name         = var.stack_name_read_permissions
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
   tags         = var.tags

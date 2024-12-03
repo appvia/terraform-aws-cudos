@@ -10,5 +10,7 @@ locals {
   destination_account_id = var.destination_account_id
   ## The organization units where the dashboard is being deployed
   organizational_unit_ids = join(",", var.organizational_unit_ids)
+  ## Indicate if the read permissions stack should be deployed
+  enable_read_permissions = length(organizational_unit_ids) > 0
 }
 
