@@ -98,8 +98,6 @@ module "source" {
 ## Provision the stack contain the cora data exports in the management account
 ## Deployment of same stack the management account
 resource "aws_cloudformation_stack" "core_data_export_management" {
-  count = var.enable_cora_data_exports ? 1 : 0
-
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
   name         = var.stack_name_cora_data_exports_source
   on_failure   = "ROLLBACK"
@@ -110,8 +108,7 @@ resource "aws_cloudformation_stack" "core_data_export_management" {
     "DestinationAccountId" = local.destination_account_id,
     "EnableSCAD"           = var.enable_scad ? "yes" : "no",
     "ManageCOH"            = "yes",
-    "ManageCUR2"           = "no",
-    "SourceAccountIds"     = local.management_account_id,
+    "ManageCUR2"           = "yes",
   }
 
   lifecycle {

@@ -307,8 +307,8 @@ resource "aws_cloudformation_stack" "core_data_export_destination" {
   parameters = {
     "DestinationAccountId" = local.account_id,
     "EnableSCAD"           = var.enable_scad ? "yes" : "no",
-    "ManageCOH"            = "yes",
-    "ManageCUR2"           = "no",
+    "ManageCOH"            = "no",
+    "ManageCUR2"           = "yes",
     "SourceAccountIds"     = join(",", local.payer_account_ids),
   }
 
