@@ -104,6 +104,12 @@ variable "enable_rightsizing_module" {
   default     = true
 }
 
+variable "enable_compute_optimizization_hub" {
+  description = "Indicates if the Compute Optimizization Hub module should be enabled"
+  type        = bool
+  default     = false
+}
+
 variable "organizational_unit_ids" {
   description = "List of organization units where the read permissions stack will be deployed"
   type        = list(string)
