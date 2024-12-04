@@ -83,6 +83,7 @@ resource "aws_s3_object" "cloudformation_templates" {
 # tfsec:ignore:aws-s3-enable-bucket-logging
 # tfsec:ignore:aws-iam-no-policy-wildcards
 module "source" {
+  count  = var.enable_curv1 ? 1 : 0
   source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-source?ref=4.0.2"
 
   # The destination bucket to repliaction the CUR data to
