@@ -118,7 +118,7 @@ resource "aws_quicksight_user" "admin" {
 resource "aws_iam_saml_provider" "saml" {
   count = var.enable_sso ? 1 : 0
 
-  name                   = "aws-cudos-sso"
+  name                   = var.saml_provider_name
   saml_metadata_document = var.saml_metadata
   tags                   = var.tags
 }
@@ -162,7 +162,7 @@ data "aws_iam_policy_document" "cudos_sso_permissions" {
 resource "aws_iam_role" "cudos_sso" {
   count = var.enable_sso ? 1 : 0
 
-  name               = "aws-cudos-sso"
+  name               = var.saml_iam_role_name
   assume_role_policy = data.aws_iam_policy_document.cudos_sso[0].json
   tags               = var.tags
 }

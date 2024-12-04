@@ -47,7 +47,9 @@
 | <a name="input_quicksight_subscription_email"></a> [quicksight\_subscription\_email](#input\_quicksight\_subscription\_email) | The email address for the QuickSight quicksight\_subscription edition | `string` | `null` | no |
 | <a name="input_quicksight_users"></a> [quicksight\_users](#input\_quicksight\_users) | Map of user accounts to be registered in QuickSight | <pre>map(object({<br/>    identity_type = optional(string, "IAM")<br/>    namespace     = optional(string, "default")<br/>    role          = optional(string, "READER")<br/>  }))</pre> | `{}` | no |
 | <a name="input_quicksights_username"></a> [quicksights\_username](#input\_quicksights\_username) | The username for the QuickSight user | `string` | `"admin"` | no |
+| <a name="input_saml_iam_role_name"></a> [saml\_iam\_role\_name](#input\_saml\_iam\_role\_name) | Name of the role all authentication users are initially given | `string` | `"aws-cudos-sso"` | no |
 | <a name="input_saml_metadata"></a> [saml\_metadata](#input\_saml\_metadata) | The configuration for the SAML identity provider | `string` | `null` | no |
+| <a name="input_saml_provider_name"></a> [saml\_provider\_name](#input\_saml\_provider\_name) | The name of the SAML provider | `string` | `"aws-cudos-sso"` | no |
 | <a name="input_stack_name_cloud_intelligence"></a> [stack\_name\_cloud\_intelligence](#input\_stack\_name\_cloud\_intelligence) | The name of the CloudFormation stack to create the dashboards | `string` | `"CI-Cloud-Intelligence-Dashboards"` | no |
 | <a name="input_stack_name_collectors"></a> [stack\_name\_collectors](#input\_stack\_name\_collectors) | The name of the CloudFormation stack to create the collectors | `string` | `"CidDataCollectionStack"` | no |
 | <a name="input_stack_name_cora_data_exports"></a> [stack\_name\_cora\_data\_exports](#input\_stack\_name\_cora\_data\_exports) | The name of the CloudFormation stack to create the Data Exports | `string` | `"CidDataExportsDestinationStack"` | no |

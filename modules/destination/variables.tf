@@ -21,6 +21,18 @@ variable "enable_quicksight_subscription" {
   default     = false
 }
 
+variable "saml_provider_name" {
+  description = "The name of the SAML provider"
+  type        = string
+  default     = "aws-cudos-sso"
+}
+
+variable "saml_iam_role_name" {
+  description = "Name of the role all authentication users are initially given"
+  type        = string
+  default     = "aws-cudos-sso"
+}
+
 variable "quicksight_subscription_email" {
   description = "The email address for the QuickSight quicksight_subscription edition"
   type        = string
