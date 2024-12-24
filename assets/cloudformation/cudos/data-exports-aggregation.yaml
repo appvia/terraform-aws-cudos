@@ -2,7 +2,7 @@
 ## https://raw.githubusercontent.com/aws-samples/aws-cudos-framework-deployment/refs/heads/main/cfn-templates/data-exports-aggregation.yaml
 #
 AWSTemplateFormatVersion: "2010-09-09"
-Description: AWS Billing Data Export Aggregation v0.1.4
+Description: AWS Billing Data Export Aggregation v0.1.5
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -23,6 +23,7 @@ Metadata:
         Parameters:
           - EnableSCAD
           - RolePath
+          - TimeGranularity
 
     ParameterLabels:
       ManageCOH:
@@ -39,6 +40,8 @@ Metadata:
         default: "Source Account Ids (Comma separated list)"
       EnableSCAD:
         default: "Enable Split Cost Allocation Data (SCAD) in CUR 2.0"
+      TimeGranularity:
+        default: "CUR 2.0 Granularity. Do not change."
 
 Parameters:
   ##
@@ -89,8 +92,13 @@ Parameters:
     Default: "yes"
   RolePath:
     Type: String
-    Default: "/"
     Description: Path for roles where PermissionBoundaries can limit location
+    Default: "/"
+  TimeGranularity:
+    Type: String
+    Description: Changing of this parameter will require redeployment of this Stack, purging of data in Destination and then additional Backfill request. HOURLY is a recommended option unless your AWS invoice is more then $50M (in this case contact your TAM when installing).
+    Default: "HOURLY"
+    AllowedValues: ["HOURLY", "DAILY", "MONTHLY"]
 
 Conditions:
   EmptySourceAccountIds: !Equals [!Ref SourceAccountIds, ""]
@@ -177,15 +185,15 @@ Mappings:
     #Mappings for storing values for different Data Exports tables
     CUR2:
       DefaultQuery: >-
-        SELECT bill_bill_type, bill_billing_entity, bill_billing_period_end_date, bill_billing_period_start_date, bill_invoice_id, bill_invoicing_entity, bill_payer_account_id, bill_payer_account_name, cost_category, discount, discount_bundled_discount, discount_total_discount, identity_line_item_id, identity_time_interval, line_item_availability_zone, line_item_blended_cost, line_item_blended_rate, line_item_currency_code, line_item_legal_entity, line_item_line_item_description, line_item_line_item_type, line_item_net_unblended_cost, line_item_net_unblended_rate, line_item_normalization_factor, line_item_normalized_usage_amount, line_item_operation, line_item_product_code, line_item_resource_id, line_item_tax_type, line_item_unblended_cost, line_item_unblended_rate, line_item_usage_account_id, line_item_usage_account_name, line_item_usage_amount, line_item_usage_end_date, line_item_usage_start_date, line_item_usage_type, pricing_currency, pricing_lease_contract_length, pricing_offering_class, pricing_public_on_demand_cost, pricing_public_on_demand_rate, pricing_purchase_option, pricing_rate_code, pricing_rate_id, pricing_term, pricing_unit, product, product_comment, product_fee_code, product_fee_description, product_from_location, product_from_location_type, product_from_region_code, product_instance_family, product_instance_type, product_instancesku, product_location, product_location_type, product_operation, product_pricing_unit, product_product_family, product_region_code, product_servicecode, product_sku, product_to_location, product_to_location_type, product_to_region_code, product_usagetype, reservation_amortized_upfront_cost_for_usage, reservation_amortized_upfront_fee_for_billing_period, reservation_availability_zone, reservation_effective_cost, reservation_end_time, reservation_modification_status, reservation_net_amortized_upfront_cost_for_usage, reservation_net_amortized_upfront_fee_for_billing_period, reservation_net_effective_cost, reservation_net_recurring_fee_for_usage, reservation_net_unused_amortized_upfront_fee_for_billing_period, reservation_net_unused_recurring_fee, reservation_net_upfront_value, reservation_normalized_units_per_reservation, reservation_number_of_reservations, reservation_recurring_fee_for_usage, reservation_reservation_a_r_n, reservation_start_time, reservation_subscription_id, reservation_total_reserved_normalized_units, reservation_total_reserved_units, reservation_units_per_reservation, reservation_unused_amortized_upfront_fee_for_billing_period, reservation_unused_normalized_unit_quantity, reservation_unused_quantity, reservation_unused_recurring_fee, reservation_upfront_value, resource_tags, savings_plan_amortized_upfront_commitment_for_billing_period, savings_plan_end_time, savings_plan_instance_type_family, savings_plan_net_amortized_upfront_commitment_for_billing_period, savings_plan_net_recurring_commitment_for_billing_period, savings_plan_net_savings_plan_effective_cost, savings_plan_offering_type, savings_plan_payment_option, savings_plan_purchase_term, savings_plan_recurring_commitment_for_billing_period, savings_plan_region, savings_plan_savings_plan_a_r_n, savings_plan_savings_plan_effective_cost, savings_plan_savings_plan_rate, savings_plan_start_time, savings_plan_total_commitment_to_date, savings_plan_used_commitment 
+        SELECT bill_bill_type, bill_billing_entity, bill_billing_period_end_date, bill_billing_period_start_date, bill_invoice_id, bill_invoicing_entity, bill_payer_account_id, bill_payer_account_name, cost_category, discount, discount_bundled_discount, discount_total_discount, identity_line_item_id, identity_time_interval, line_item_availability_zone, line_item_blended_cost, line_item_blended_rate, line_item_currency_code, line_item_legal_entity, line_item_line_item_description, line_item_line_item_type, line_item_net_unblended_cost, line_item_net_unblended_rate, line_item_normalization_factor, line_item_normalized_usage_amount, line_item_operation, line_item_product_code, line_item_resource_id, line_item_tax_type, line_item_unblended_cost, line_item_unblended_rate, line_item_usage_account_id, line_item_usage_account_name, line_item_usage_amount, line_item_usage_end_date, line_item_usage_start_date, line_item_usage_type, pricing_currency, pricing_lease_contract_length, pricing_offering_class, pricing_public_on_demand_cost, pricing_public_on_demand_rate, pricing_purchase_option, pricing_rate_code, pricing_rate_id, pricing_term, pricing_unit, product, product_comment, product_fee_code, product_fee_description, product_from_location, product_from_location_type, product_from_region_code, product_instance_family, product_instance_type, product_instancesku, product_location, product_location_type, product_operation, product_pricing_unit, product_product_family, product_region_code, product_servicecode, product_sku, product_to_location, product_to_location_type, product_to_region_code, product_usagetype, reservation_amortized_upfront_cost_for_usage, reservation_amortized_upfront_fee_for_billing_period, reservation_availability_zone, reservation_effective_cost, reservation_end_time, reservation_modification_status, reservation_net_amortized_upfront_cost_for_usage, reservation_net_amortized_upfront_fee_for_billing_period, reservation_net_effective_cost, reservation_net_recurring_fee_for_usage, reservation_net_unused_amortized_upfront_fee_for_billing_period, reservation_net_unused_recurring_fee, reservation_net_upfront_value, reservation_normalized_units_per_reservation, reservation_number_of_reservations, reservation_recurring_fee_for_usage, reservation_reservation_a_r_n, reservation_start_time, reservation_subscription_id, reservation_total_reserved_normalized_units, reservation_total_reserved_units, reservation_units_per_reservation, reservation_unused_amortized_upfront_fee_for_billing_period, reservation_unused_normalized_unit_quantity, reservation_unused_quantity, reservation_unused_recurring_fee, reservation_upfront_value, resource_tags, savings_plan_amortized_upfront_commitment_for_billing_period, savings_plan_end_time, savings_plan_instance_type_family, savings_plan_net_amortized_upfront_commitment_for_billing_period, savings_plan_net_recurring_commitment_for_billing_period, savings_plan_net_savings_plan_effective_cost, savings_plan_offering_type, savings_plan_payment_option, savings_plan_purchase_term, savings_plan_recurring_commitment_for_billing_period, savings_plan_region, savings_plan_savings_plan_a_r_n, savings_plan_savings_plan_effective_cost, savings_plan_savings_plan_rate, savings_plan_start_time, savings_plan_total_commitment_to_date, savings_plan_used_commitment
         FROM COST_AND_USAGE_REPORT
       SCADQuery: >-
-        SELECT bill_bill_type, bill_billing_entity, bill_billing_period_end_date, bill_billing_period_start_date, bill_invoice_id, bill_invoicing_entity, bill_payer_account_id, bill_payer_account_name, cost_category, discount, discount_bundled_discount, discount_total_discount, identity_line_item_id, identity_time_interval, line_item_availability_zone, line_item_blended_cost, line_item_blended_rate, line_item_currency_code, line_item_legal_entity, line_item_line_item_description, line_item_line_item_type, line_item_net_unblended_cost, line_item_net_unblended_rate, line_item_normalization_factor, line_item_normalized_usage_amount, line_item_operation, line_item_product_code, line_item_resource_id, line_item_tax_type, line_item_unblended_cost, line_item_unblended_rate, line_item_usage_account_id, line_item_usage_account_name, line_item_usage_amount, line_item_usage_end_date, line_item_usage_start_date, line_item_usage_type, pricing_currency, pricing_lease_contract_length, pricing_offering_class, pricing_public_on_demand_cost, pricing_public_on_demand_rate, pricing_purchase_option, pricing_rate_code, pricing_rate_id, pricing_term, pricing_unit, product, product_comment, product_fee_code, product_fee_description, product_from_location, product_from_location_type, product_from_region_code, product_instance_family, product_instance_type, product_instancesku, product_location, product_location_type, product_operation, product_pricing_unit, product_product_family, product_region_code, product_servicecode, product_sku, product_to_location, product_to_location_type, product_to_region_code, product_usagetype, reservation_amortized_upfront_cost_for_usage, reservation_amortized_upfront_fee_for_billing_period, reservation_availability_zone, reservation_effective_cost, reservation_end_time, reservation_modification_status, reservation_net_amortized_upfront_cost_for_usage, reservation_net_amortized_upfront_fee_for_billing_period, reservation_net_effective_cost, reservation_net_recurring_fee_for_usage, reservation_net_unused_amortized_upfront_fee_for_billing_period, reservation_net_unused_recurring_fee, reservation_net_upfront_value, reservation_normalized_units_per_reservation, reservation_number_of_reservations, reservation_recurring_fee_for_usage, reservation_reservation_a_r_n, reservation_start_time, reservation_subscription_id, reservation_total_reserved_normalized_units, reservation_total_reserved_units, reservation_units_per_reservation, reservation_unused_amortized_upfront_fee_for_billing_period, reservation_unused_normalized_unit_quantity, reservation_unused_quantity, reservation_unused_recurring_fee, reservation_upfront_value, resource_tags, savings_plan_amortized_upfront_commitment_for_billing_period, savings_plan_end_time, savings_plan_instance_type_family, savings_plan_net_amortized_upfront_commitment_for_billing_period, savings_plan_net_recurring_commitment_for_billing_period, savings_plan_net_savings_plan_effective_cost, savings_plan_offering_type, savings_plan_payment_option, savings_plan_purchase_term, savings_plan_recurring_commitment_for_billing_period, savings_plan_region, savings_plan_savings_plan_a_r_n, savings_plan_savings_plan_effective_cost, savings_plan_savings_plan_rate, savings_plan_start_time, savings_plan_total_commitment_to_date, savings_plan_used_commitment, split_line_item_actual_usage, split_line_item_net_split_cost, split_line_item_net_unused_cost, split_line_item_parent_resource_id, split_line_item_public_on_demand_split_cost, split_line_item_public_on_demand_unused_cost, split_line_item_reserved_usage, split_line_item_split_cost, split_line_item_split_usage, split_line_item_split_usage_ratio, split_line_item_unused_cost    
+        SELECT bill_bill_type, bill_billing_entity, bill_billing_period_end_date, bill_billing_period_start_date, bill_invoice_id, bill_invoicing_entity, bill_payer_account_id, bill_payer_account_name, cost_category, discount, discount_bundled_discount, discount_total_discount, identity_line_item_id, identity_time_interval, line_item_availability_zone, line_item_blended_cost, line_item_blended_rate, line_item_currency_code, line_item_legal_entity, line_item_line_item_description, line_item_line_item_type, line_item_net_unblended_cost, line_item_net_unblended_rate, line_item_normalization_factor, line_item_normalized_usage_amount, line_item_operation, line_item_product_code, line_item_resource_id, line_item_tax_type, line_item_unblended_cost, line_item_unblended_rate, line_item_usage_account_id, line_item_usage_account_name, line_item_usage_amount, line_item_usage_end_date, line_item_usage_start_date, line_item_usage_type, pricing_currency, pricing_lease_contract_length, pricing_offering_class, pricing_public_on_demand_cost, pricing_public_on_demand_rate, pricing_purchase_option, pricing_rate_code, pricing_rate_id, pricing_term, pricing_unit, product, product_comment, product_fee_code, product_fee_description, product_from_location, product_from_location_type, product_from_region_code, product_instance_family, product_instance_type, product_instancesku, product_location, product_location_type, product_operation, product_pricing_unit, product_product_family, product_region_code, product_servicecode, product_sku, product_to_location, product_to_location_type, product_to_region_code, product_usagetype, reservation_amortized_upfront_cost_for_usage, reservation_amortized_upfront_fee_for_billing_period, reservation_availability_zone, reservation_effective_cost, reservation_end_time, reservation_modification_status, reservation_net_amortized_upfront_cost_for_usage, reservation_net_amortized_upfront_fee_for_billing_period, reservation_net_effective_cost, reservation_net_recurring_fee_for_usage, reservation_net_unused_amortized_upfront_fee_for_billing_period, reservation_net_unused_recurring_fee, reservation_net_upfront_value, reservation_normalized_units_per_reservation, reservation_number_of_reservations, reservation_recurring_fee_for_usage, reservation_reservation_a_r_n, reservation_start_time, reservation_subscription_id, reservation_total_reserved_normalized_units, reservation_total_reserved_units, reservation_units_per_reservation, reservation_unused_amortized_upfront_fee_for_billing_period, reservation_unused_normalized_unit_quantity, reservation_unused_quantity, reservation_unused_recurring_fee, reservation_upfront_value, resource_tags, savings_plan_amortized_upfront_commitment_for_billing_period, savings_plan_end_time, savings_plan_instance_type_family, savings_plan_net_amortized_upfront_commitment_for_billing_period, savings_plan_net_recurring_commitment_for_billing_period, savings_plan_net_savings_plan_effective_cost, savings_plan_offering_type, savings_plan_payment_option, savings_plan_purchase_term, savings_plan_recurring_commitment_for_billing_period, savings_plan_region, savings_plan_savings_plan_a_r_n, savings_plan_savings_plan_effective_cost, savings_plan_savings_plan_rate, savings_plan_start_time, savings_plan_total_commitment_to_date, savings_plan_used_commitment, split_line_item_actual_usage, split_line_item_net_split_cost, split_line_item_net_unused_cost, split_line_item_parent_resource_id, split_line_item_public_on_demand_split_cost, split_line_item_public_on_demand_unused_cost, split_line_item_reserved_usage, split_line_item_split_cost, split_line_item_split_usage, split_line_item_split_usage_ratio, split_line_item_unused_cost
         FROM COST_AND_USAGE_REPORT
     FOCUS:
       DefaultQuery: >-
         SELECT AvailabilityZone, BilledCost, BillingAccountId, BillingAccountName, BillingCurrency, BillingPeriodEnd, BillingPeriodStart, ChargeCategory, ChargeClass, ChargeDescription, ChargeFrequency, ChargePeriodEnd, ChargePeriodStart, CommitmentDiscountCategory, CommitmentDiscountId, CommitmentDiscountName, CommitmentDiscountType, CommitmentDiscountStatus, ConsumedQuantity, ConsumedUnit, ContractedCost, ContractedUnitPrice, EffectiveCost, InvoiceIssuerName, ListCost, ListUnitPrice, PricingCategory, PricingQuantity, PricingUnit, ProviderName, PublisherName, RegionId, RegionName, ResourceId, ResourceName, ResourceType, ServiceCategory, ServiceName, SkuId, SkuPriceId, SubAccountId, SubAccountName, Tags, x_CostCategories, x_Discounts, x_Operation, x_ServiceCode, x_UsageType
-        FROM FOCUS_1_0_AWS_PREVIEW
+        FROM FOCUS_1_0_AWS
     COH:
       DefaultQuery: >-
         SELECT account_id, action_type, currency_code, current_resource_details, current_resource_summary, current_resource_type, estimated_monthly_cost_after_discount, estimated_monthly_cost_before_discount, estimated_monthly_savings_after_discount, estimated_monthly_savings_before_discount, estimated_savings_percentage_after_discount, estimated_savings_percentage_before_discount, implementation_effort, last_refresh_timestamp, recommendation_id, recommendation_lookback_period_in_days, recommendation_source, recommended_resource_details, recommended_resource_summary, recommended_resource_type, region, resource_arn, restart_needed, rollback_possible, tags
@@ -471,7 +479,7 @@ Resources:
             ]
           TableConfigurations:
             COST_AND_USAGE_REPORT:
-              TIME_GRANULARITY: "HOURLY"
+              TIME_GRANULARITY: !Ref TimeGranularity
               INCLUDE_RESOURCES: "TRUE"
               INCLUDE_MANUAL_DISCOUNT_COMPATIBILITY: "FALSE"
               INCLUDE_SPLIT_COST_ALLOCATION_DATA:
@@ -508,7 +516,7 @@ Resources:
             ]
           TableConfigurations:
             COST_AND_USAGE_REPORT:
-              TIME_GRANULARITY: "HOURLY"
+              TIME_GRANULARITY: !Ref TimeGranularity
               INCLUDE_RESOURCES: "TRUE"
               INCLUDE_MANUAL_DISCOUNT_COMPATIBILITY: "FALSE"
               INCLUDE_SPLIT_COST_ALLOCATION_DATA:
@@ -675,12 +683,10 @@ Resources:
                 Action:
                   - iam:GetRole
                   - iam:CreateServiceLinkedRole
-                  - iam:DeleteServiceLinkedRole
-                  - iam:GetServiceLinkedRoleDeletionStatus
                 Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/bcm-data-exports.amazonaws.com/AWSServiceRoleForBCMDataExports"
               - Effect: Allow
                 Action:
-                  - cost-optimization-hub:GetPreferences
+                  - cost-optimization-hub:ListEnrollmentStatuses
                 Resource: "*" # Cannot restrict this
 
     Metadata:
@@ -699,57 +705,100 @@ Resources:
       Handler: index.handler
       MemorySize: 128
       Runtime: python3.12
-      Timeout: 15
+      Timeout: 90
       Role: !GetAtt LambdaServiceLinkedRoleExecutionRole.Arn
       Code:
         ZipFile: |
           import json
+          import logging
           import time
-          import boto3
-          import cfnresponse
+
+          import boto3  # type: ignore
+          from botocore.exceptions import ClientError  # type: ignore
+          from botocore.config import Config  # type: ignore
+          import cfnresponse  # type: ignore
+
+          CUSTOM_RESOURCE_PHYSICAL_ID = "CreateServiceLinkedRoleBcmDataExports"
+
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+
+          config = Config(retries={"max_attempts": 5, "mode": "standard"})
+          iam_client = boto3.client("iam", region_name="us-east-1", config=config)
+          coh_client = boto3.client("cost-optimization-hub", region_name="us-east-1", config=config)  # noqa: E501
+
 
           def handler(event, context):
-              print(json.dumps(event))
-              coh = boto3.client('cost-optimization-hub', region_name='us-east-1')
-              iam = boto3.client('iam')
+              logger.info(f"Event: {json.dumps(event, default=str)}")
+
               try:
-                  if event['RequestType'] in ['Create', 'Update']:
+                  if event["RequestType"] == "Delete":
+                      cfnresponse.send(event, context, cfnresponse.SUCCESS,
+                                      {}, physicalResourceId=CUSTOM_RESOURCE_PHYSICAL_ID)
+                      return
 
-                      print("Make sure CO hub is activated")
-                      try:
-                          coh.get_preferences()
-                      except Exception as e:
-                          if 'AWS account is not enrolled for recommendations' in str(e):
-                              raise Exception('AWS account is not enrolled for recommendations. Please activate Cost Optimization Hub.')
-                          raise
+                  account_id = context.invoked_function_arn.split(":")[4]
+                  validate_coh_enrollment(account_id)
+                  create_service_linked_role(
+                      service_name="bcm-data-exports.amazonaws.com",
+                      description="Service-linked role for bcm-data-exports.amazonaws.com"
+                  )
 
-                      print("Creating service linked role")
-                      iam.create_service_linked_role(
-                          AWSServiceName='bcm-data-exports.amazonaws.com',
-                          Description='Service-linked role for bcm-data-exports.amazonaws.com'
-                      )
-
-                      print("Waiting for the role to be created")
-                      for i in range(60):
-                          try:
-                              iam.get_role(RoleName='AWSServiceRoleForBCMDataExports')
-                              print("Role is created")
-                              break
-                          except iam.exceptions.NoSuchEntityException:
-                              time.sleep(1)
-
-                      print("Additional wait to make sure the role is available")
-                      time.sleep(30)
-
-                  cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS,
+                                  {}, physicalResourceId=CUSTOM_RESOURCE_PHYSICAL_ID)
 
               except Exception as e:
-                  if 'has been taken in this account' in str(e):
-                      print('the role AWSServiceRoleForBCMDataExports already exist')
-                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+                  logger.exception(e)
+                  cfnresponse.send(event, context, cfnresponse.FAILED,
+                                  {}, physicalResourceId=CUSTOM_RESOURCE_PHYSICAL_ID, reason=str(e))
+
+
+          def validate_coh_enrollment(account_id: str):
+              """
+              Returns `None` if account is enrolled in Cost Optimization Hub; otherwise, raises `AssertionError`
+              """
+              logger.info("Checking if account is enrolled in COH...")
+
+              paginator = coh_client.get_paginator("list_enrollment_statuses")
+              page_iterator = paginator.paginate(accountId=account_id)
+              items = [item
+                      for page in page_iterator
+                      for item in page["items"]
+                      if item["status"] == "Active"]
+
+              if items:
+                  logger.info("Account is enrolled in COH")
+                  return
+
+              raise AssertionError(
+                  "Account is NOT enrolled in COH. Please try again after enabling Cost Optimization Hub."
+              )
+
+
+          def create_service_linked_role(service_name: str, description: str):
+              try:
+                  logger.info(f"Creating a service-linked role for {service_name}...")
+                  role_name = iam_client.create_service_linked_role(
+                      AWSServiceName=service_name,
+                      Description=description
+                  )["Role"]["RoleName"]
+
+                  logger.info(f"Waiting for the service-linked role to be available...")
+                  waiter = iam_client.get_waiter("role_exists")
+                  waiter.wait(
+                      RoleName=role_name,
+                      WaiterConfig={"Delay": 1, "MaxAttempts": 30}
+                  )
+                  time.sleep(10)  # Additional wait time, just in case
+
+                  logger.info(
+                      f"Successfully created a service-linked role for {service_name}: {role_name}")
+              except ClientError as e:
+                  if e.response["Error"]["Code"] == "InvalidInput":
+                      logger.info(
+                          f"Service-linked role for {service_name} already exists")
                   else:
-                      print(e)
-                      cfnresponse.send(event, context, cfnresponse.FAILED, {}, reason=str(e))
+                      raise
     Metadata:
       cfn_nag:
         rules_to_suppress:
@@ -763,6 +812,7 @@ Resources:
     Type: "AWS::CloudFormation::CustomResource"
     Properties:
       ServiceToken: !GetAtt CreateServiceLinkedRoleFunction.Arn
+      ServiceTimeout: "90"
 
   ###########################################################################
   # Lambda DataExport Creator: used to create DataExport from outside us-east-1 or cn-northwest-1
@@ -1545,7 +1595,7 @@ Resources:
             reason: "Need an explicit name for reference"
 
 Outputs:
-  DestinationBucketName:
+  AggregateBucketName:
     Description: Bucket with aggregate Data Exports
     Value: !Sub ${ResourcePrefix}-${DestinationAccountId}-data-exports
     Export: { Name: "cid-DataExports-Bucket" }
