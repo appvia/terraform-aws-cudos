@@ -84,7 +84,7 @@ resource "aws_s3_object" "cloudformation_templates" {
 # tfsec:ignore:aws-iam-no-policy-wildcards
 module "source" {
   count  = var.enable_curv1 ? 1 : 0
-  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-source?ref=4.0.6"
+  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-source?ref=4.0.7"
 
   # The destination bucket to repliaction the CUR data to
   destination_bucket_arn = var.destination_bucket_arn
