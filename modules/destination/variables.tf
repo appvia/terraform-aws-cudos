@@ -239,7 +239,7 @@ variable "enable_prerequisites_quicksight_permissions" {
 variable "saml_metadata" {
   description = "The configuration for the SAML identity provider"
   type        = string
-  default     = null
+  default     = ""
 }
 
 variable "quicksight_groups" {
