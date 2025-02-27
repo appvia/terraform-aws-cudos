@@ -17,7 +17,7 @@ resource "aws_quicksight_user" "users" {
   identity_type = each.value.identity_type
   namespace     = try(each.value.namespace, "default")
   session_name  = each.value.identity_type == "IAM" ? each.key : null
-  user_name     = each.value.identity_type == "QUICKSIGHT" ? try(each.value.user_name, null) : null
+  user_name     = each.value.identity_type == "QUICKSIGHT" ? split("@", each.key)[1] : null
   user_role     = try(each.value.role, null)
 
   lifecycle {
