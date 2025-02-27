@@ -13,7 +13,7 @@ resource "aws_quicksight_user" "users" {
   for_each = var.quicksight_users
 
   email         = each.key
-  iam_arn       = each.value.identity_type == "IAM" ? aws_iam_role.cudos_sso[0].arn : null
+  iam_arn       = each.value.identity_type == "IAM" ? try(aws_iam_role.cudos_sso[0].arn, null) : null
   identity_type = each.value.identity_type
   namespace     = try(each.value.namespace, "default")
   session_name  = each.value.identity_type == "IAM" ? each.key : null
