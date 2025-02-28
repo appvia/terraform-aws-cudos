@@ -83,7 +83,6 @@ The `terraform-docs` utility is used to generate this README. Follow the below s
 To enable the Cora Data Exports, please see https://catalog.workshops.aws/awscid/en-US/dashboards/additional/cora for more information, you simply have to enable the `var.enable_cora_data_exports`. This will deploy an additional [cloudformation](./assets/cloudformation/cudos/data-exports-aggregation.yaml) with the management account.
 
 <!-- BEGIN_TF_DOCS -->
-
 ## Providers
 
 No providers.
@@ -95,5 +94,4 @@ No inputs.
 ## Outputs
 
 No outputs.
-
 <!-- END_TF_DOCS -->
