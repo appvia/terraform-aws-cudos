@@ -1,8 +1,5 @@
-#
-## https://github.com/awslabs/cid-framework/blob/main/data-collection/deploy/deploy-data-read-permissions.yaml
-#
 AWSTemplateFormatVersion: "2010-09-09"
-Description: CID Data Collection - All-in-One for Management Account v3.5.0
+Description: CID Data Collection - All-in-One for Management Account v3.7.0
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -109,73 +106,73 @@ Parameters:
   IncludeBudgetsModule:
     Type: String
     Description: Collects budgets from your accounts
-    AllowedValues: ["yes", "no"]
-    Default: "no"
+    AllowedValues: ['yes', 'no']
+    Default: 'no'
   IncludeComputeOptimizerModule:
     Type: String
     Description: Collects AWS Compute Optimizer service recommendations
-    AllowedValues: ["yes", "no"]
-    Default: "no"
+    AllowedValues: ['yes', 'no']
+    Default: 'no'
   IncludeCostAnomalyModule:
     Type: String
     Description: "Collects AWS Cost Explorer Cost Anomalies Recommendations"
-    AllowedValues: ["yes", "no"]
-    Default: "no"
+    AllowedValues: ['yes', 'no']
+    Default: 'no'
   IncludeSupportCasesModule:
     Type: String
     Description: "Collects AWS Support Cases data"
-    AllowedValues: ["yes", "no"]
-    Default: "no"
+    AllowedValues: ['yes', 'no']
+    Default: 'no'
   IncludeECSChargebackModule:
     Type: String
     Description: Collects data which shows costs associated with ECS Tasks leveraging EC2 instances within a Cluster
-    AllowedValues: ["yes", "no"]
-    Default: "no"
+    AllowedValues: ['yes', 'no']
+    Default: 'no'
   IncludeInventoryCollectorModule:
     Type: String
     Description: Collects data about AMIs, EBS volumes and snapshots
-    AllowedValues: ["yes", "no"]
-    Default: "no"
+    AllowedValues: ['yes', 'no']
+    Default: 'no'
   IncludeRDSUtilizationModule:
     Type: String
     Description: Collects RDS CloudWatch metrics from your accounts
-    AllowedValues: ["yes", "no"]
-    Default: "no"
+    AllowedValues: ['yes', 'no']
+    Default: 'no'
   IncludeRightsizingModule:
     Type: String
     Description: "Collects AWS Cost Explorer Rightsizing Recommendations"
-    AllowedValues: ["yes", "no"]
-    Default: "no"
+    AllowedValues: ['yes', 'no']
+    Default: 'no'
   IncludeTAModule:
     Type: String
     Description: Collects AWS Trusted Advisor recommendations data
-    AllowedValues: ["yes", "no"]
-    Default: "no"
+    AllowedValues: ['yes', 'no']
+    Default: 'no'
   IncludeTransitGatewayModule:
     Type: String
     Description: Collects TransitGateway from your accounts
-    AllowedValues: ["yes", "no"]
-    Default: "no"
+    AllowedValues: ['yes', 'no']
+    Default: 'no'
   IncludeBackupModule:
     Type: String
     Description: Collects AWS Backup events from your accounts
-    AllowedValues: ["yes", "no"]
-    Default: "no"
+    AllowedValues: ['yes', 'no']
+    Default: 'no'
   IncludeHealthEventsModule:
     Type: String
     Description: Collects AWS Health Events from your accounts
-    AllowedValues: ["yes", "no"]
-    Default: "no"
+    AllowedValues: ['yes', 'no']
+    Default: 'no'
   IncludeLicenseManagerModule:
     Type: String
     Description: Collects Marketplace Licensing information
-    AllowedValues: ["yes", "no"]
-    Default: "no"
+    AllowedValues: ['yes', 'no']
+    Default: 'no'
   IncludeServiceQuotasModule:
     Type: String
     Description: Collects Service Quotas information
-    AllowedValues: ["yes", "no"]
-    Default: "no"
+    AllowedValues: ['yes', 'no']
+    Default: 'no'
 
 Conditions:
   DeployModuleReadInMgmt: !Equals [!Ref AllowModuleReadInMgmt, "yes"]
@@ -184,7 +181,7 @@ Resources:
   DataCollectorMgmtAccountReadStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub "https://${CFNSourceBucket}.s3.amazonaws.com/cfn/data-collection/deploy-in-management-account.yaml"
+      TemplateURL: !Sub "https://${CFNSourceBucket}.s3.${AWS::URLSuffix}/cfn/data-collection/deploy-in-management-account.yaml"
       Parameters:
         DataCollectionAccountID: !Ref DataCollectionAccountID
         ManagementAccountRole: !Ref ManagementAccountRole
@@ -201,7 +198,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: DeployModuleReadInMgmt
     Properties:
-      TemplateURL: !Sub "https://${CFNSourceBucket}.s3.amazonaws.com/cfn/data-collection/deploy-in-linked-account.yaml"
+      TemplateURL: !Sub "https://${CFNSourceBucket}.s3.${AWS::URLSuffix}/cfn/data-collection/deploy-in-linked-account.yaml"
       Parameters:
         DataCollectionAccountID: !Ref DataCollectionAccountID
         MultiAccountRoleName: !Ref MultiAccountRoleName
@@ -217,7 +214,7 @@ Resources:
   DataCollectorOrgAccountModulesReadStackSet:
     Type: AWS::CloudFormation::StackSet
     Properties:
-      Description: "StackSet in charge of deploying read roles across organization accounts v3.5.0"
+      Description: "StackSet in charge of deploying read roles across organization accounts v3.7.0"
       PermissionModel: SERVICE_MANAGED
       AutoDeployment:
         Enabled: true
@@ -260,4 +257,4 @@ Resources:
         - CAPABILITY_IAM
         - CAPABILITY_NAMED_IAM
       StackSetName: !Sub "StackSet-${AWS::AccountId}-OptimizationDataRole"
-      TemplateURL: !Sub "https://${CFNSourceBucket}.s3.amazonaws.com/cfn/data-collection/deploy-in-linked-account.yaml"
+      TemplateURL: !Sub "https://${CFNSourceBucket}.s3.${AWS::URLSuffix}/cfn/data-collection/deploy-in-linked-account.yaml"

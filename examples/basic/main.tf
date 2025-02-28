@@ -18,9 +18,12 @@ module "destination" {
   dashboards_bucket_name     = local.dashboard_bucket_name
   enable_sso                 = true
   payer_accounts             = ["1234343434"]
-  quicksights_username       = var.quicksights_username
   saml_metadata              = file("${path.module}/assets/saml-metadata.xml")
   tags                       = var.tags
+
+  quicksight_admin_email     = "quicksight-admin@example.com"
+  quicksight_admin_username  = "admin"
+  quicksight_dashboard_owner = "admin"
 
   providers = {
     aws           = aws.cost_analysis

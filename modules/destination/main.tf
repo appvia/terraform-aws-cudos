@@ -104,7 +104,7 @@ resource "aws_quicksight_account_subscription" "subscription" {
 
 ## Provision a administator user in quicksight
 resource "aws_quicksight_user" "admin" {
-  count = local.enable_admin ? 1 : 0
+  count = var.enable_quicksight_admin ? 1 : 0
 
   email         = var.quicksight_admin_email
   identity_type = "QUICKSIGHT"
@@ -264,7 +264,7 @@ module "dashboards" {
     "DeployTAODashboard"                 = var.enable_tao_dashboard ? "yes" : "no"
     "PrerequisitesQuickSight"            = var.enable_prerequisites_quicksight ? "yes" : "no"
     "PrerequisitesQuickSightPermissions" = var.enable_prerequisites_quicksight_permissions ? "yes" : "no"
-    "QuickSightUser"                     = var.quicksights_username
+    "QuickSightUser"                     = var.quicksight_dashboard_owner
   }
 
   depends_on = [

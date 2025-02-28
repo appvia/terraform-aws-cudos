@@ -9,7 +9,6 @@ locals {
   ## The URL for the s3 bucket containing cloudformation scripts
   bucket_url = format("https://%s.s3.%s.amazonaws.com", var.cloudformation_bucket_name, local.region)
   ## Indicates if we should provision the quicksight admin user
-  enable_admin = var.enable_quicksight_admin && var.quicksight_admin_email != null
 
   ## Is the user mappings for the quicksight groups
   user_group_mappings = merge([
