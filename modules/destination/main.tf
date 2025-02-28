@@ -264,7 +264,7 @@ module "dashboards" {
     "DeployTAODashboard"                 = var.enable_tao_dashboard ? "yes" : "no"
     "PrerequisitesQuickSight"            = var.enable_prerequisites_quicksight ? "yes" : "no"
     "PrerequisitesQuickSightPermissions" = var.enable_prerequisites_quicksight_permissions ? "yes" : "no"
-    "QuickSightUser"                     = var.quicksights_username
+    "QuickSightUser"                     = var.quicksight_username
   }
 
   depends_on = [

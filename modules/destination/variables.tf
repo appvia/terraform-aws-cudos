@@ -81,7 +81,7 @@ variable "dashboards_bucket_name" {
 }
 
 variable "enable_quicksight_admin" {
-  description = "Enable the creation of an admin user (var.quicksights_username) in QuickSight"
+  description = "Enable the creation of an admin user (var.quicksight_username) in QuickSight"
   type        = bool
   default     = true
 }
@@ -252,7 +252,7 @@ variable "quicksight_groups" {
   default = {}
 }
 
-variable "quicksights_username" {
+variable "quicksight_username" {
   description = "The username for the QuickSight user"
   type        = string
   default     = "admin"

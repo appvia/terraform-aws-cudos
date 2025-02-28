@@ -7,7 +7,7 @@ variable "tags" {
   }
 }
 
-variable "quicksights_username" {
+variable "quicksight_username" {
   description = "The username to use for QuickSight"
   type        = string
   default     = "admin"
