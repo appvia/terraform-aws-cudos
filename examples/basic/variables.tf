@@ -6,9 +6,3 @@ variable "tags" {
     Environment = "Production"
   }
 }
-
-variable "quicksight_dashboard_owner" {
-  description = "The username to use for QuickSight"
-  type        = string
-  default     = "admin"
-}

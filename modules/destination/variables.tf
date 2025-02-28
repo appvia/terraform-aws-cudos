@@ -97,12 +97,6 @@ variable "quicksight_admin_email" {
   type        = string
 }
 
-variable "create_quicksight_admin_user" {
-  description = "Whether to create a QuickSight admin user (var.quicksight_admin_username)"
-  type        = bool
-  default     = true
-}
-
 variable "enable_sso" {
   description = "Enable integration with identity center for QuickSight"
   type        = bool

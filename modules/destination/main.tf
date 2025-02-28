@@ -104,7 +104,7 @@ resource "aws_quicksight_account_subscription" "subscription" {
 
 ## Provision a administator user in quicksight
 resource "aws_quicksight_user" "admin" {
-  count = var.create_quicksight_admin_user ? 1 : 0
+  count = var.enable_quicksight_admin ? 1 : 0
 
   email         = var.quicksight_admin_email
   identity_type = "QUICKSIGHT"
