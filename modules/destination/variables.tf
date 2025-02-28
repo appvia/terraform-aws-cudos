@@ -81,7 +81,7 @@ variable "dashboards_bucket_name" {
 }
 
 variable "enable_quicksight_admin" {
-  description = "Enable the creation of an admin user (var.quicksight_username) in QuickSight"
+  description = "Enable the creation of an admin user (var.quicksight_dashboard_owner) in QuickSight"
   type        = bool
   default     = true
 }
@@ -93,9 +93,14 @@ variable "quicksight_admin_username" {
 }
 
 variable "quicksight_admin_email" {
-  description = "The email address for the QuickSight admin user"
+  description = "The email address for the QuickSight admin user. Required if var.create_quicksight_admin_user is true"
   type        = string
-  default     = null
+}
+
+variable "create_quicksight_admin_user" {
+  description = "Whether to create a QuickSight admin user (var.quicksight_admin_username)"
+  type        = bool
+  default     = true
 }
 
 variable "enable_sso" {
@@ -252,8 +257,8 @@ variable "quicksight_groups" {
   default = {}
 }
 
-variable "quicksight_username" {
-  description = "The username for the QuickSight user"
+variable "quicksight_dashboard_owner" {
+  description = "The username for the QuickSight user who will own the dashboards. This user needs to exist. By default, it will be the admin user which is created by the module."
   type        = string
   default     = "admin"
 }

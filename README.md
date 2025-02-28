@@ -36,7 +36,7 @@ module "cudos_framework" {
   enable_sso                         = true
   enable_tao_dashboard               = false
   saml_metadata                      = file("${path.module}/assets/saml-metadata.xml")
-  quicksight_username               = var.quicksight_username
+  quicksight_dashboard_owner               = var.quicksight_dashboard_owner
   tags                               = var.tags
 
   providers = {
