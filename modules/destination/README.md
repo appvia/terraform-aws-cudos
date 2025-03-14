@@ -11,7 +11,6 @@
 |------|-------------|------|---------|:--------:|
 | <a name="input_cloudformation_bucket_name"></a> [cloudformation\_bucket\_name](#input\_cloudformation\_bucket\_name) | The name of the bucket to store the CloudFormation | `string` | n/a | yes |
 | <a name="input_dashboards_bucket_name"></a> [dashboards\_bucket\_name](#input\_dashboards\_bucket\_name) | The name of the bucket to store the dashboards configurations | `string` | n/a | yes |
-| <a name="input_quicksight_admin_email"></a> [quicksight\_admin\_email](#input\_quicksight\_admin\_email) | The email address for the QuickSight admin user. Required if var.create\_quicksight\_admin\_user is true | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to all resources | `map(string)` | n/a | yes |
 | <a name="input_enable_backup_module"></a> [enable\_backup\_module](#input\_enable\_backup\_module) | Indicates if the Backup module should be enabled | `bool` | `true` | no |
 | <a name="input_enable_budgets_module"></a> [enable\_budgets\_module](#input\_enable\_budgets\_module) | Indicates if the Budget module should be enabled | `bool` | `true` | no |
@@ -29,7 +28,7 @@
 | <a name="input_enable_org_data_module"></a> [enable\_org\_data\_module](#input\_enable\_org\_data\_module) | Indicates if the Organization Data module should be enabled | `bool` | `true` | no |
 | <a name="input_enable_prerequisites_quicksight"></a> [enable\_prerequisites\_quicksight](#input\_enable\_prerequisites\_quicksight) | Indicates if the prerequisites for QuickSight should be enabled | `bool` | `true` | no |
 | <a name="input_enable_prerequisites_quicksight_permissions"></a> [enable\_prerequisites\_quicksight\_permissions](#input\_enable\_prerequisites\_quicksight\_permissions) | Indicates if the prerequisites for QuickSight permissions should be enabled | `bool` | `true` | no |
-| <a name="input_enable_quicksight_admin"></a> [enable\_quicksight\_admin](#input\_enable\_quicksight\_admin) | Enable the creation of an admin user (var.quicksight\_dashboard\_owner) in QuickSight | `bool` | `true` | no |
+| <a name="input_enable_quicksight_admin"></a> [enable\_quicksight\_admin](#input\_enable\_quicksight\_admin) | Enable the creation of an admin user (var.quicksight\_admin\_username) in QuickSight | `bool` | `true` | no |
 | <a name="input_enable_quicksight_subscription"></a> [enable\_quicksight\_subscription](#input\_enable\_quicksight\_subscription) | Enable QuickSight subscription | `bool` | `false` | no |
 | <a name="input_enable_rds_utilization_module"></a> [enable\_rds\_utilization\_module](#input\_enable\_rds\_utilization\_module) | Indicates if the RDS Utilization module should be enabled | `bool` | `true` | no |
 | <a name="input_enable_rightsizing_module"></a> [enable\_rightsizing\_module](#input\_enable\_rightsizing\_module) | Indicates if the Rightsizing module should be enabled | `bool` | `true` | no |
@@ -39,6 +38,7 @@
 | <a name="input_enable_tao_module"></a> [enable\_tao\_module](#input\_enable\_tao\_module) | Indicates if the TAO module should be enabled | `bool` | `true` | no |
 | <a name="input_enable_transit_gateway_module"></a> [enable\_transit\_gateway\_module](#input\_enable\_transit\_gateway\_module) | Indicates if the Transit Gateway module should be enabled | `bool` | `true` | no |
 | <a name="input_payer_accounts"></a> [payer\_accounts](#input\_payer\_accounts) | List of additional payer accounts to be included in the collectors module | `list(string)` | `[]` | no |
+| <a name="input_quicksight_admin_email"></a> [quicksight\_admin\_email](#input\_quicksight\_admin\_email) | The email address for the QuickSight admin user. Required if var.create\_quicksight\_admin\_user is true | `string` | `null` | no |
 | <a name="input_quicksight_admin_username"></a> [quicksight\_admin\_username](#input\_quicksight\_admin\_username) | The username for the QuickSight admin user | `string` | `"admin"` | no |
 | <a name="input_quicksight_dashboard_owner"></a> [quicksight\_dashboard\_owner](#input\_quicksight\_dashboard\_owner) | The username for the QuickSight user who will own the dashboards. This user needs to exist. By default, it will be the admin user which is created by the module. | `string` | `"admin"` | no |
 | <a name="input_quicksight_groups"></a> [quicksight\_groups](#input\_quicksight\_groups) | Map of groups with user membership to be added to QuickSight | <pre>map(object({<br/>    description = optional(string)<br/>    namespace   = optional(string)<br/>    members     = optional(list(string), [])<br/>  }))</pre> | `{}` | no |
