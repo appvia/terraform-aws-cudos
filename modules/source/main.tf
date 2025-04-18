@@ -40,7 +40,7 @@ data "aws_iam_policy_document" "stack_bucket_policy" {
 # tfsec:ignore:aws-s3-enable-bucket-logging
 module "cloudformation_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "4.6.0"
+  version = "4.7.0"
 
   attach_policy           = true
   block_public_acls       = true
