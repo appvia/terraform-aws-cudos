@@ -268,3 +268,8 @@ variable "quicksight_users" {
   default = {}
 }
 
+variable "enable_compute_optimizization_hub" {
+  description = "Indicates if the Compute Optimizization Hub module should be enabled"
+  type        = bool
+  default     = false
+}
