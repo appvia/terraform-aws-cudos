@@ -29,7 +29,7 @@ resource "aws_quicksight_group_membership" "members" {
   for_each = local.user_group_mappings
 
   group_name  = aws_quicksight_group.groups[each.value.group].group_name
-  member_name = each.value.identity_type == "IAM" ? format("%s/%s", aws_iam_role.cudos_sso[0].name, each.value.user) : each.value.user
+  member_name = each.value.identity_type == "IAM" ? format("%s/%s", aws_iam_role.cudos_sso[0].name, each.value.user) : try(split("@", each.value.user)[0], each.value.user)
 
   depends_on = [aws_quicksight_user.users]
 }
