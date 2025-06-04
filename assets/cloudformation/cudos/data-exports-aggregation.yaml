@@ -1,7 +1,9 @@
 ---
-# https://raw.githubusercontent.com/awslabs/cid-data-collection-framework/refs/heads/main/data-exports/deploy/data-exports-aggregation.yaml
+#
+## https://raw.githubusercontent.com/awslabs/cid-data-collection-framework/refs/heads/main/data-exports/deploy/data-exports-aggregation.yaml
+#
 AWSTemplateFormatVersion: "2010-09-09"
-Description: AWS Billing Data Export Aggregation v0.3.0
+Description: AWS Billing Data Export Aggregation v0.5.0 - AWS Solution SO9011
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -13,6 +15,7 @@ Metadata:
           - ManageCUR2
           - ManageFOCUS
           - ManageCOH
+          - ManageCarbon
       - Label:
           default: "Parameters needed in Destination (Data Collection) Account only"
         Parameters:
@@ -32,6 +35,8 @@ Metadata:
         default: "CUR 2.0"
       ManageFOCUS:
         default: "FOCUS"
+      ManageCarbon:
+        default: "Carbon Emissions"
       DestinationAccountId:
         default: "Destination (Data Collection) Account Id"
       ResourcePrefix:
@@ -76,6 +81,11 @@ Parameters:
     Description: "NOTE: you must have Cost Optimization Hub Enabled"
     AllowedValues: ["yes", "no"]
     Default: "no"
+  ManageCarbon:
+    Type: String
+    Description: ""
+    AllowedValues: ["yes", "no"]
+    Default: "no"
 
   ##
   # Destination specific params
@@ -112,6 +122,23 @@ Parameters:
     Type: String
     Description: Leave Empty. A Bucket name for optional supplementary data replication. If not empty, the export data will be replicated to this bucket in addition to the default replication destination. Keep it empty if unsure.
     Default: ""
+  AddScheduleForBlockingWrite:
+    Type: String
+    Description: "Set yes to schedule Disabling/Enabling schedule to stop CUR replication for a short period of time to secure QuickSight Dataset refresh."
+    Default: "no"
+    AllowedValues: ["yes", "no"]
+  DisableWriteCronSchedule:
+    Type: String
+    Description: "Cron expression for disabling replication (UTC)"
+    Default: "0 1 * * ? *"
+    AllowedPattern: '^[0-9*,\-/\s?]+$'
+    ConstraintDescription: Must be a valid cron expression
+  EnableWriteCronSchedule:
+    Type: String
+    Description: "Cron expression for enabling replication (UTC)"
+    Default: "0 3 * * ? *"
+    AllowedPattern: '^[0-9*,\-/\s?]+$'
+    ConstraintDescription: Must be a valid cron expression
 
 Conditions:
   EmptySourceAccountIds: !Equals [!Ref SourceAccountIds, ""]
@@ -135,12 +162,14 @@ Conditions:
   ManageCUR2: !Equals [!Ref ManageCUR2, "yes"]
   ManageFOCUS: !Equals [!Ref ManageFOCUS, "yes"]
   ManageCOH: !Equals [!Ref ManageCOH, "yes"]
+  ManageCarbon: !Equals [!Ref ManageCarbon, "yes"]
   EnableSCAD: !Equals [!Ref EnableSCAD, "yes"]
   DeployDataExport:
     Fn::Or:
       - !Condition ManageCUR2
       - !Condition ManageFOCUS
       - !Condition ManageCOH
+      - !Condition ManageCarbon
   DeploySourceS3:
     Fn::And:
       - !Condition IsSourceAccount
@@ -164,6 +193,12 @@ Conditions:
       !Condition ManageCOH,
       !Condition RegionSupportsDataExportsViaCFN,
     ]
+  DeployCarbonViaCFN:
+    !And [
+      !Condition IsSourceAccount,
+      !Condition ManageCarbon,
+      !Condition RegionSupportsDataExportsViaCFN,
+    ]
   DeployCUR2ViaLambda:
     !And [
       !Condition IsSourceAccount,
@@ -182,21 +217,31 @@ Conditions:
       !Condition ManageCOH,
       !Not [!Condition RegionSupportsDataExportsViaCFN],
     ]
+  DeployCarbonViaLambda:
+    !And [
+      !Condition IsSourceAccount,
+      !Condition ManageCarbon,
+      !Not [!Condition RegionSupportsDataExportsViaCFN],
+    ]
   DeployCUR2Table: !And [!Condition IsDestinationAccount, !Condition ManageCUR2]
   DeployFOCUSTable:
     !And [!Condition IsDestinationAccount, !Condition ManageFOCUS]
   DeployCOHTable: !And [!Condition IsDestinationAccount, !Condition ManageCOH]
+  DeployCarbonTable:
+    !And [!Condition IsDestinationAccount, !Condition ManageCarbon]
   DeployAnyExportViaLambda:
     !Or [
       !Condition DeployCUR2ViaLambda,
       !Condition DeployFOCUSViaLambda,
       !Condition DeployCOHViaLambda,
+      !Condition DeployCarbonViaLambda,
     ]
   DeployAnyTable:
     !Or [
       !Condition DeployFOCUSTable,
       !Condition DeployCUR2Table,
       !Condition DeployCOHTable,
+      !Condition DeployCarbonTable,
     ]
 
   NeedLakeFormationEnabledDB:
@@ -207,6 +252,12 @@ Conditions:
     !And [!Condition NeedLakeFormationEnabledDB, !Condition ManageCUR2]
   NeedLakeFormationEnabledFOCUS:
     !And [!Condition NeedLakeFormationEnabledDB, !Condition ManageFOCUS]
+  NeedLakeFormationEnabledCarbon:
+    !And [!Condition NeedLakeFormationEnabledDB, !Condition ManageCarbon]
+  DeployWriteBlocker:
+    Fn::And:
+      - !Condition IsDestinationAccount
+      - !Equals [!Ref AddScheduleForBlockingWrite, "yes"]
 
 Mappings:
   DataExports:
@@ -226,6 +277,10 @@ Mappings:
       DefaultQuery: >-
         SELECT account_id, action_type, currency_code, current_resource_details, current_resource_summary, current_resource_type, estimated_monthly_cost_after_discount, estimated_monthly_cost_before_discount, estimated_monthly_savings_after_discount, estimated_monthly_savings_before_discount, estimated_savings_percentage_after_discount, estimated_savings_percentage_before_discount, implementation_effort, last_refresh_timestamp, recommendation_id, recommendation_lookback_period_in_days, recommendation_source, recommended_resource_details, recommended_resource_summary, recommended_resource_type, region, resource_arn, restart_needed, rollback_possible, tags
         FROM COST_OPTIMIZATION_RECOMMENDATIONS
+    Carbon:
+      DefaultQuery: >-
+        SELECT last_refresh_timestamp, location, model_version, payer_account_id, product_code, region_code, total_mbm_emissions_unit, total_mbm_emissions_value, usage_account_id, usage_period_end, usage_period_start
+        FROM CARBON_EMISSIONS
 
 Resources:
   ###########################################################################
@@ -267,7 +322,12 @@ Resources:
         Rules:
           - Id: Object&Version Expiration
             Status: Enabled
-            NoncurrentVersionExpirationInDays: 32 # 1 month
+            NoncurrentVersionExpirationInDays: 1
+          - Id: DeleteIncompleteMultipartUploadsAndExpiredDeleteMarkers
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 7
+            ExpiredObjectDeleteMarker: true
     Metadata:
       cfn_nag:
         rules_to_suppress:
@@ -375,28 +435,54 @@ Resources:
               Bucket: !Sub "arn:${AWS::Partition}:s3:::${ResourcePrefix}-${DestinationAccountId}-data-exports"
               StorageClass: STANDARD
             Id: ReplicateCUR2Data
-            Prefix: !Sub "cur2/${AWS::AccountId}/${ResourcePrefix}-cur2/data/" # Hardcoded export name
+            Filter:
+              Prefix: !Sub "cur2/${AWS::AccountId}/${ResourcePrefix}-cur2/data/" # Hardcoded export name
             Status: Enabled
+            Priority: 1
+            DeleteMarkerReplication:
+              Status: Enabled
           - Destination:
               Bucket: !Sub "arn:${AWS::Partition}:s3:::${ResourcePrefix}-${DestinationAccountId}-data-exports"
               StorageClass: STANDARD
             Id: ReplicateFOCUSData
-            Prefix: !Sub "focus/${AWS::AccountId}/${ResourcePrefix}-focus/data/" # Hardcoded export name
+            Filter:
+              Prefix: !Sub "focus/${AWS::AccountId}/${ResourcePrefix}-focus/data/" # Hardcoded export name
             Status: Enabled
+            Priority: 2
+            DeleteMarkerReplication:
+              Status: Enabled
           - Destination:
               Bucket: !Sub "arn:${AWS::Partition}:s3:::${ResourcePrefix}-${DestinationAccountId}-data-exports"
               StorageClass: STANDARD
             Id: ReplicateCOHData
-            Prefix: !Sub "coh/${AWS::AccountId}/${ResourcePrefix}-coh/data/" # Hardcoded export name
+            Filter:
+              Prefix: !Sub "coh/${AWS::AccountId}/${ResourcePrefix}-coh/data/" # Hardcoded export name
             Status: Enabled
+            Priority: 3
+            DeleteMarkerReplication:
+              Status: Enabled
+          - Destination:
+              Bucket: !Sub "arn:${AWS::Partition}:s3:::${ResourcePrefix}-${DestinationAccountId}-data-exports"
+              StorageClass: STANDARD
+            Id: ReplicateCarbonData
+            Filter:
+              Prefix: !Sub "carbon/${AWS::AccountId}/${ResourcePrefix}-carbon/data/" # Hardcoded export name
+            Status: Enabled
+            Priority: 4
+            DeleteMarkerReplication:
+              Status: Enabled
           - Fn::If:
               - NonEmptySecondaryDestinationBucket
               - Destination:
                   Bucket: !Sub "arn:${AWS::Partition}:s3:::${SecondaryDestinationBucket}"
                   StorageClass: STANDARD
                 Id: ReplicateCUR2DataToSecondaryBucket
-                Prefix: !Sub "cur2/${AWS::AccountId}/${ResourcePrefix}-cur2/data/" # Hardcoded export name
+                Filter:
+                  Prefix: !Sub "cur2/${AWS::AccountId}/${ResourcePrefix}-cur2/data/" # Hardcoded export name
                 Status: Enabled
+                Priority: 101
+                DeleteMarkerReplication:
+                  Status: Enabled
               - !Ref "AWS::NoValue"
           - Fn::If:
               - NonEmptySecondaryDestinationBucket
@@ -404,8 +490,12 @@ Resources:
                   Bucket: !Sub "arn:${AWS::Partition}:s3:::${SecondaryDestinationBucket}"
                   StorageClass: STANDARD
                 Id: ReplicateFOCUSDataToSecondaryBucket
-                Prefix: !Sub "focus/${AWS::AccountId}/${ResourcePrefix}-focus/data/" # Hardcoded export name
+                Filter:
+                  Prefix: !Sub "focus/${AWS::AccountId}/${ResourcePrefix}-focus/data/" # Hardcoded export name
                 Status: Enabled
+                Priority: 102
+                DeleteMarkerReplication:
+                  Status: Enabled
               - !Ref "AWS::NoValue"
           - Fn::If:
               - NonEmptySecondaryDestinationBucket
@@ -413,15 +503,37 @@ Resources:
                   Bucket: !Sub "arn:${AWS::Partition}:s3:::${SecondaryDestinationBucket}"
                   StorageClass: STANDARD
                 Id: ReplicateCOHDataToSecondaryBucket
-                Prefix: !Sub "coh/${AWS::AccountId}/${ResourcePrefix}-coh/data/" # Hardcoded export name
+                Filter:
+                  Prefix: !Sub "coh/${AWS::AccountId}/${ResourcePrefix}-coh/data/" # Hardcoded export name
                 Status: Enabled
+                Priority: 103
+                DeleteMarkerReplication:
+                  Status: Enabled
+              - !Ref "AWS::NoValue"
+          - Fn::If:
+              - NonEmptySecondaryDestinationBucket
+              - Destination:
+                  Bucket: !Sub "arn:${AWS::Partition}:s3:::${SecondaryDestinationBucket}"
+                  StorageClass: STANDARD
+                Id: ReplicateCarbonDataToSecondaryBucket
+                Filter:
+                  Prefix: !Sub "carbon/${AWS::AccountId}/${ResourcePrefix}-carbon/data/" # Hardcoded export name
+                Status: Enabled
+                Priority: 104
+                DeleteMarkerReplication:
+                  Status: Enabled
               - !Ref "AWS::NoValue"
       LifecycleConfiguration:
         Rules:
           - Id: Object&Version Expiration
             Status: Enabled
-            NoncurrentVersionExpirationInDays: 32 # 1 month
-            ExpirationInDays: 64 # 2 months
+            NoncurrentVersionExpirationInDays: 1
+            ExpirationInDays: 7
+          - Id: DeleteIncompleteMultipartUploadsAndExpiredDeleteMarkers
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 7
+            ExpiredObjectDeleteMarker: true
       Tags: # Hacky way to manage conditional dependencies
         - Key: IgnoreConditionalDependency
           Value: !If [IsDestinationAccount, !Ref DestinationS3, ""]
@@ -523,6 +635,118 @@ Resources:
                       !Sub "arn:${AWS::Partition}:s3:::${SecondaryDestinationBucket}/*/${AWS::AccountId}/*",
                       !Ref "AWS::NoValue",
                     ]
+
+  BucketWriteBlockerLambdaRole:
+    Type: AWS::IAM::Role
+    Condition: DeployWriteBlocker
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: BucketPolicyAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetBucketPolicy
+                  - s3:PutBucketPolicy
+                Resource: !GetAtt DestinationS3.Arn
+
+  BucketWriteBlockerPolicyLambda:
+    Type: AWS::Lambda::Function
+    Condition: DeployWriteBlocker
+    Properties:
+      Runtime: python3.12
+      Handler: index.lambda_handler
+      FunctionName: !Sub ${ResourcePrefix}-CID-WriteBlocker
+      Role: !GetAtt BucketWriteBlockerLambdaRole.Arn
+      Code:
+        ZipFile: |
+          import os
+          import json
+          import boto3
+
+          POLICY_SID = os.environ['POLICY_SID']
+          BUCKET_NAME = os.environ['BUCKET_NAME']
+          s3 = boto3.client('s3')
+
+          def lambda_handler(event, context):
+              action = event.get('action', 'enable')  # 'enable' or 'disable'
+              try:
+                  policy = json.loads(s3.get_bucket_policy(Bucket=BUCKET_NAME)['Policy'])
+                  # Find and modify the policy statement
+                  for statement in policy['Statement']:
+                      if statement.get('Sid') == POLICY_SID:
+                          statement['Effect'] = 'Allow' if action == 'enable' else 'Deny'
+                          break
+                  else:
+                      raise Exception(f'{POLICY_SID} statement not found in policy')
+                  s3.put_bucket_policy(Bucket=BUCKET_NAME, Policy=json.dumps(policy))
+                  return {'statusCode': 200, 'body': f'Successfully {action}d {POLICY_SID} statement'}
+              except Exception as e:
+                  return {'statusCode': 500, 'body': str(e) }
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref DestinationS3
+          POLICY_SID: "AllowReplicationWrite"
+      MemorySize: 128
+      Timeout: 60
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: "W89"
+            reason: "This Lambda does not require VPC"
+          - id: "W92"
+            reason: "One Time execution. No need for ReservedConcurrentExecutions"
+  DisableRuleSchedule:
+    Type: AWS::Events::Rule
+    Condition: DeployWriteBlocker
+    Properties:
+      Description: !Sub "Schedule for disabling replication using cron: ${DisableWriteCronSchedule}"
+      ScheduleExpression: !Sub "cron(${DisableWriteCronSchedule})"
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt BucketWriteBlockerPolicyLambda.Arn
+          Id: "DisableReplicationTarget"
+          Input: '{"action": "disable"}'
+
+  EnableRuleSchedule:
+    Type: AWS::Events::Rule
+    Condition: DeployWriteBlocker
+    Properties:
+      Description: !Sub "Schedule for enabling replication using cron: ${EnableWriteCronSchedule}"
+      ScheduleExpression: !Sub "cron(${EnableWriteCronSchedule})"
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt BucketWriteBlockerPolicyLambda.Arn
+          Id: "EnableReplicationTarget"
+          Input: '{"action": "enable"}'
+
+  LambdaPermissionDisable:
+    Type: AWS::Lambda::Permission
+    Condition: DeployWriteBlocker
+    Properties:
+      FunctionName: !Ref BucketWriteBlockerPolicyLambda
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt DisableRuleSchedule.Arn
+
+  LambdaPermissionEnable:
+    Type: AWS::Lambda::Permission
+    Condition: DeployWriteBlocker
+    Properties:
+      FunctionName: !Ref BucketWriteBlockerPolicyLambda
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt EnableRuleSchedule.Arn
 
   # CUR2
 
@@ -878,6 +1102,58 @@ Resources:
       ServiceToken: !GetAtt CreateServiceLinkedRoleFunction.Arn
       ServiceTimeout: "90"
 
+  # Carbon Emissions
+
+  ## Deploy Data Export natively via CFN resource in regions that support native CFN
+  LocalCarbonViaCFN:
+    Type: AWS::BCMDataExports::Export
+    Condition: DeployCarbonViaCFN
+    DependsOn:
+      - SourceS3BucketPolicy
+    Properties:
+      Export:
+        DataQuery:
+          QueryStatement: !FindInMap [DataExports, Carbon, DefaultQuery]
+        Description: "Carbon emissions export for aggregation in CID"
+        DestinationConfigurations:
+          S3Destination:
+            S3Bucket: !Ref SourceS3
+            S3Prefix: !Sub "carbon/${AWS::AccountId}" # Explicitly hardcode name of folder (it will be the same as table name)
+            S3Region: !Ref AWS::Region
+            S3OutputConfigurations:
+              Overwrite: "OVERWRITE_REPORT"
+              Format: "PARQUET"
+              Compression: "PARQUET"
+              OutputType: "CUSTOM"
+        Name: !Sub "${ResourcePrefix}-carbon"
+        RefreshCadence:
+          Frequency: "SYNCHRONOUS"
+
+  # Deploy Data Export via Lambda due to missing CFN resource definition AWS::BCMDataExports::Export outside us-east-1 or cn-northwest-1
+  LocalCarbonViaCustomResource:
+    Type: Custom::CUR2Creator
+    Condition: DeployCarbonViaLambda
+    Properties:
+      ServiceToken: !GetAtt CidDataExportCreatorLambda.Arn
+      BucketPolicyWait: !Ref SourceS3BucketPolicy
+      Export:
+        DataQuery:
+          QueryStatement: !FindInMap [DataExports, Carbon, DefaultQuery]
+        Description: "Carbon emissions export for aggregation in CID"
+        DestinationConfigurations:
+          S3Destination:
+            S3Bucket: !Ref SourceS3
+            S3Prefix: !Sub "carbon/${AWS::AccountId}" # Explicitly hardcode name of folder (it will be the same as table name)
+            S3Region: !Ref AWS::Region
+            S3OutputConfigurations:
+              Overwrite: "OVERWRITE_REPORT"
+              Format: "PARQUET"
+              Compression: "PARQUET"
+              OutputType: "CUSTOM"
+        Name: !Sub "${ResourcePrefix}-carbon"
+        RefreshCadence:
+          Frequency: "SYNCHRONOUS"
+
   ###########################################################################
   # Lambda DataExport Creator: used to create DataExport from outside us-east-1 or cn-northwest-1
   ###########################################################################
@@ -933,6 +1209,9 @@ Resources:
                   - cost-optimization-hub:GetRecommendation #need this permission for bcm-data-exports to work
                   - cost-optimization-hub:ListRecommendations
                 Resource: "arn:aws:cost-optimization-hub:*"
+              - Effect: Allow
+                Action: sustainability:GetCarbonFootprintSummary # needed ad carbon emissions data export creation time
+                Resource: "*"
 
   CidDataExportCreatorLambda:
     Type: AWS::Lambda::Function
@@ -1439,6 +1718,96 @@ Resources:
           }
         }
 
+  ###########################################################################
+  # Carbon emissions
+  ###########################################################################
+
+  CarbonTable: # Initial creation of table. it will be updated by crawler later
+    Type: AWS::Glue::Table
+    Condition: DeployCarbonTable
+    Properties:
+      CatalogId: !Sub "${AWS::AccountId}"
+      DatabaseName: !Ref CIDDatabase
+      TableInput:
+        Name: carbon
+        Owner: owner
+        Retention: 0
+        TableType: EXTERNAL_TABLE
+        Parameters:
+          compressionType: none
+          classification: parquet
+          UPDATED_BY_CRAWLER: !Ref CarbonCrawler
+        StorageDescriptor:
+          BucketColumns: []
+          Compressed: false
+          Location: !Sub "s3://${DestinationS3}/carbon/"
+          NumberOfBuckets: -1
+          InputFormat: org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat
+          OutputFormat: org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat
+          SerdeInfo:
+            Parameters:
+              serialization.format: "1"
+            SerializationLibrary: org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe
+          StoredAsSubDirectories: false
+          Columns: # All fields required for CID
+            - { "Name": "payer_account_id", "Type": "string" }
+            - { "Name": "usage_account_id", "Type": "string" }
+            - { "Name": "total_mbm_emissions_value", "Type": "double" }
+            - { "Name": "total_mbm_emissions_unit", "Type": "string" }
+            - { "Name": "model_version", "Type": "string" }
+            - { "Name": "product_code", "Type": "string" }
+            - { "Name": "usage_period_start", "Type": "timestamp" }
+            - { "Name": "usage_period_end", "Type": "timestamp" }
+            - { "Name": "last_refresh_timestamp", "Type": "timestamp" }
+            - { "Name": "region_code", "Type": "string" }
+            - { "Name": "location", "Type": "string" }
+        PartitionKeys:
+          - { "Name": "source_account_id", "Type": "string" }
+          - { "Name": "report_name", "Type": "string" }
+          - { "Name": "data", "Type": "string" }
+          - { "Name": "carbon_model_version", "Type": "string" }
+          - { "Name": "usage_period", "Type": "string" }
+
+  CarbonCrawler:
+    Type: AWS::Glue::Crawler
+    Condition: DeployCarbonTable
+    Properties:
+      Name: !Sub "${ResourcePrefix}-DataExportCarbonCrawler"
+      Description: A recurring crawler that keeps your Carbon emissions table in Athena up-to-date.
+      Role: !GetAtt CidDataExportCrawlerRole.Arn
+      DatabaseName: !Ref CIDDatabase
+      Targets:
+        S3Targets:
+          - Path: !Sub "s3://${DestinationS3}/carbon/"
+            Exclusions:
+              - "**.json"
+              - "**.yml"
+              - "**.sql"
+              - "**.csv"
+              - "**.csv.metadata"
+              - "**.gz"
+              - "**.zip"
+              - "**/cost_and_usage_data_status/*"
+              - "aws-programmatic-access-test-object"
+      SchemaChangePolicy:
+        DeleteBehavior: LOG
+      RecrawlPolicy:
+        RecrawlBehavior: CRAWL_EVERYTHING
+      Schedule:
+        ScheduleExpression: cron(0 2 * * ? *)
+      Configuration: |
+        {
+          "Version":1.0,
+          "Grouping": {
+            "TableGroupingPolicy": "CombineCompatibleSchemas"
+          },
+          "CrawlerOutput":{
+            "Tables":{
+              "AddOrUpdateBehavior":"MergeNewColumns"
+            }
+          }
+        }
+
   LakeFormationTagsForDatabase:
     Type: AWS::LakeFormation::TagAssociation
     Condition: NeedLakeFormationEnabledDB
@@ -1492,6 +1861,21 @@ Resources:
           CatalogId: !Ref "AWS::AccountId"
           DatabaseName: !Ref CIDDatabase
           Name: !Ref FOCUSTable
+      LFTags:
+        - TagKey: !ImportValue cid-LakeFormation-TagKey # you need to install cid-lakeformation-prerequisite.yaml
+          TagValues:
+            - !ImportValue cid-LakeFormation-TagValue
+          CatalogId: !Ref "AWS::AccountId"
+
+  LakeFormationTagsForCarbon:
+    Type: AWS::LakeFormation::TagAssociation
+    Condition: NeedLakeFormationEnabledCarbon
+    Properties:
+      Resource:
+        Table:
+          CatalogId: !Ref "AWS::AccountId"
+          DatabaseName: !Ref CIDDatabase
+          Name: !Ref CarbonTable
       LFTags:
         - TagKey: !ImportValue cid-LakeFormation-TagKey # you need to install cid-lakeformation-prerequisite.yaml
           TagValues:
