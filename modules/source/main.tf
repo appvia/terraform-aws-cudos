@@ -136,6 +136,5 @@ resource "aws_cloudformation_stack" "cudos_read_permissions" {
 
   depends_on = [
     aws_s3_object.cloudformation_templates,
-    module.source,
   ]
 }
