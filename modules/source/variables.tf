@@ -38,12 +38,6 @@ variable "enable_cost_anomaly_module" {
   default     = true
 }
 
-variable "enable_curv1" {
-  description = "Indicates if the CURv1 module should be enabled (deprecated)"
-  type        = bool
-  default     = false
-}
-
 variable "enable_ecs_chargeback_module" {
   description = "Indicates if the ECS Chargeback module should be enabled"
   type        = bool

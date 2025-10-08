@@ -78,24 +78,6 @@ resource "aws_s3_object" "cloudformation_templates" {
   source                 = "${path.module}/assets/cloudformation/${each.value}"
 }
 
-## Setup the replication from the management account to the collector account
-## to receive the CUR data
-# tfsec:ignore:aws-s3-enable-bucket-logging
-# tfsec:ignore:aws-iam-no-policy-wildcards
-module "source" {
-  count  = var.enable_curv1 ? 1 : 0
-  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-source?ref=4.2.1"
-
-  # The destination bucket to repliaction the CUR data to
-  destination_bucket_arn = var.destination_bucket_arn
-  # Adding the resource tags to all resources created by this module
-  tags = var.tags
-
-  providers = {
-    aws.useast1 = aws.us_east_1
-  }
-}
-
 ## Provision the stack contain the cora data exports in the management account
 ## Deployment of same stack the management account
 resource "aws_cloudformation_stack" "data_export_management" {
