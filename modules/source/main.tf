@@ -102,7 +102,6 @@ resource "aws_cloudformation_stack" "data_export_management" {
 
   depends_on = [
     aws_s3_object.cloudformation_templates,
-    module.source,
   ]
 }
 
