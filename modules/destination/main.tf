@@ -230,48 +230,82 @@ module "dashboard_bucket" {
   }
 }
 
-## First we configure the collector to accept the CUR (Cost and Usage Report) from the source account
-# tfsec:ignore:aws-s3-enable-bucket-logging
-module "collector" {
-  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cur-setup-destination?ref=4.2.1"
+## Provision the stack contain the cora data exports in the management account
+## Deployment of same stack the management account
+resource "aws_cloudformation_stack" "data_export" {
+  capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
+  name         = var.stack_name_data_exports
+  on_failure   = "ROLLBACK"
+  tags         = var.tags
+  template_url = format("%s/cudos/%s", local.stacks_base_url, "data-exports-aggregation.yaml")
 
-  # Source account whom will be replicating the CUR data to the collector account
-  source_account_ids = local.payer_account_ids
-  # Indicates if we should create CUR data in the cost analysis account
-  create_cur = false
-  # Adding the tags to the resources
-  tags = var.tags
-
-  providers = {
-    aws.useast1 = aws.us_east_1
+  parameters = {
+    "DestinationAccountId" = local.account_id,
+    "EnableSCAD"           = "no",
+    "ManageCOH"            = "no"
+    "ManageCUR2"           = "no",
   }
-}
 
-## Provision the cloud intelligence dashboards
-module "dashboards" {
-  source = "github.com/aws-samples/aws-cudos-framework-deployment//terraform-modules/cid-dashboards?ref=4.2.1"
-
-  stack_name      = var.stack_name_cloud_intelligence
-  stack_tags      = var.tags
-  template_bucket = module.dashboard_bucket.s3_bucket_id
-
-  stack_parameters = {
-    "DeployCUDOSDashboard"               = var.enable_cudos_dashboard ? "yes" : "no"
-    "DeployCUDOSv5"                      = var.enable_cudos_v5_dashboard ? "yes" : "no"
-    "DeployComputeOptimizerDashboard"    = var.enable_compute_optimizer_dashboard ? "yes" : "no"
-    "DeployCostIntelligenceDashboard"    = var.enable_cost_intelligence_dashboard ? "yes" : "no"
-    "DeployKPIDashboard"                 = var.enable_kpi_dashboard ? "yes" : "no"
-    "DeployTAODashboard"                 = var.enable_tao_dashboard ? "yes" : "no"
-    "PrerequisitesQuickSight"            = var.enable_prerequisites_quicksight ? "yes" : "no"
-    "PrerequisitesQuickSightPermissions" = var.enable_prerequisites_quicksight_permissions ? "yes" : "no"
-    "QuickSightUser"                     = var.quicksight_dashboard_owner
+  lifecycle {
+    ignore_changes = [
+      capabilities,
+    ]
   }
 
   depends_on = [
-    aws_cloudformation_stack.data_export_destination,
+    aws_s3_object.cloudformation_templates,
+  ]
+}
+
+## Provision the cloud intelligence dashboards
+resource "aws_cloudformation_stack" "dashboards" {
+  name         = var.stack_name_cloud_intelligence
+  tags         = var.tags
+  template_url = local.cfn_dashboards_url
+
+  parameters = {
+    PrerequisitesQuickSight            = var.enable_prerequisites_quicksight ? "yes" : "no"
+    PrerequisitesQuickSightPermissions = var.enable_prerequisites_quicksight_permissions ? "yes" : "no"
+    QuickSightUser                     = var.quicksight_dashboard_owner
+    LakeFormationEnabled               = var.enable_lake_formation ? "yes" : "no"
+
+    # Dashboards to deploy
+    CURVersion                      = "2.0"
+    DeployCUDOSv5                   = var.enable_cudos_v5_dashboard ? "yes" : "no"
+    DeployCostIntelligenceDashboard = var.enable_cost_intelligence_dashboard ? "yes" : "no"
+    DeployKPIDashboard              = var.enable_kpi_dashboard ? "yes" : "no"
+    DeployTAODashboard              = var.enable_tao_dashboard ? "yes" : "no"
+    DeployComputeOptimizerDashboard = var.enable_compute_optimizer_dashboard ? "yes" : "no"
+
+    # Optimization Parameters
+    OptimizationDataCollectionBucketPath = local.data_collection_bucket
+    PrimaryTagName                       = var.data_collection_primary_tag_name
+    SecondaryTagName                     = var.data_collection_secondary_tag_name
+
+    # Technical Parameters
+    AthenaQueryResultsBucket         = var.athena_query_results_bucket
+    AthenaWorkgroup                  = var.athena_workgroup
+    DatabaseName                     = var.database_name
+    DataBucketsKmsKeysArns           = join(",", var.data_buckets_kms_keys_arns)
+    DeploymentType                   = var.deployment_type
+    GlueDataCatalog                  = var.glue_data_catalog
+    LambdaLayerBucketPrefix          = var.lambda_layer_bucket_prefix
+    QuickSightDataSetRefreshSchedule = var.quicksight_data_set_refresh_schedule
+    QuickSightDataSourceRoleName     = var.quicksight_data_source_role_name
+    ShareDashboard                   = var.share_dashboard
+    Suffix                           = var.dashboard_suffix
+  }
+
+  timeouts {
+    create = "60m"
+    update = "60m"
+    delete = "60m"
+  }
+
+  depends_on = [
+    aws_cloudformation_stack.data_export,
     aws_quicksight_account_subscription.subscription,
     aws_quicksight_user.admin,
-    module.collector,
   ]
 }
 
@@ -282,7 +316,7 @@ resource "aws_cloudformation_stack" "data_export_destination" {
   name         = var.stack_name_cora_data_exports
   on_failure   = "ROLLBACK"
   tags         = var.tags
-  template_url = format("%s/cudos/%s", local.bucket_url, "data-exports-aggregation.yaml")
+  template_url = format("%s/cudos/%s", local.stacks_base_url, "data-exports-aggregation.yaml")
 
   parameters = {
     "DestinationAccountId" = local.account_id,
@@ -308,7 +342,7 @@ resource "aws_cloudformation_stack" "cudos_data_collection" {
   name         = var.stack_name_collectors
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
   tags         = var.tags
-  template_url = format("%s/cudos/%s", local.bucket_url, "deploy-data-collection.yaml")
+  template_url = format("%s/cudos/%s", local.stacks_base_url, "deploy-data-collection.yaml")
 
   parameters = {
     "IncludeBackupModule"             = var.enable_backup_module ? "yes" : "no",

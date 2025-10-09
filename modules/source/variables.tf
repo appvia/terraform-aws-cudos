@@ -8,6 +8,30 @@ variable "destination_bucket_arn" {
   type        = string
 }
 
+variable "enable_focus" {
+  description = "Indicates if the FOCUS module should be enabled"
+  type        = bool
+  default     = false
+}
+
+variable "enable_cur2" {
+  description = "Indicates if the CUR2 module should be enabled"
+  type        = bool
+  default     = true
+}
+
+variable "resource_prefix" {
+  description = "The prefix for the resources"
+  type        = string
+  default     = "cid"
+}
+
+variable "time_granularity" {
+  description = "The granularity of the time for the data exports"
+  type        = string
+  default     = "HOURLY"
+}
+
 variable "enable_backup_module" {
   description = "Indicates if the Backup module should be enabled"
   type        = bool

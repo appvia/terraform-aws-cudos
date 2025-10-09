@@ -88,10 +88,15 @@ resource "aws_cloudformation_stack" "data_export_management" {
   template_url = format("%s/cudos/%s", local.stacks_base_url, "data-exports-aggregation.yaml")
 
   parameters = {
-    "DestinationAccountId" = var.destination_account_id,
-    "EnableSCAD"           = var.enable_scad ? "yes" : "no",
-    "ManageCOH"            = var.enable_compute_optimizization_hub ? "yes" : "no",
-    "ManageCUR2"           = "yes",
+    DestinationAccountId = var.destination_account_id
+    EnableSCAD           = var.enable_scad ? "yes" : "no",
+    ManageCOH            = var.enable_compute_optimizization_hub ? "yes" : "no",
+    ManageCUR2           = var.enable_cur2 ? "yes" : "no"
+    ManageFOCUS          = var.enable_focus ? "yes" : "no"
+    ResourcePrefix       = var.resource_prefix
+    RolePath             = "/"
+    SourceAccountIds     = join(",", [local.management_account_id])
+    TimeGranularity      = var.time_granularity
   }
 
   lifecycle {
