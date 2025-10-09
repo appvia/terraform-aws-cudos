@@ -232,18 +232,19 @@ module "dashboard_bucket" {
 
 ## Provision the stack contain the cora data exports in the management account
 ## Deployment of same stack the management account
-resource "aws_cloudformation_stack" "data_export" {
+resource "aws_cloudformation_stack" "data_export_destination" {
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
-  name         = var.stack_name_data_exports
+  name         = var.stack_name_cora_data_exports
   on_failure   = "ROLLBACK"
   tags         = var.tags
   template_url = format("%s/cudos/%s", local.stacks_base_url, "data-exports-aggregation.yaml")
 
   parameters = {
     "DestinationAccountId" = local.account_id,
-    "EnableSCAD"           = "no",
+    "EnableSCAD"           = "no"
     "ManageCOH"            = "no"
-    "ManageCUR2"           = "no",
+    "ManageCUR2"           = "no"
+    "SourceAccountIds"     = join(",", local.payer_account_ids),
   }
 
   lifecycle {
@@ -260,6 +261,7 @@ resource "aws_cloudformation_stack" "data_export" {
 ## Provision the cloud intelligence dashboards
 resource "aws_cloudformation_stack" "dashboards" {
   name         = var.stack_name_cloud_intelligence
+  capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
   tags         = var.tags
   template_url = local.cfn_dashboards_url
 
@@ -303,37 +305,9 @@ resource "aws_cloudformation_stack" "dashboards" {
   }
 
   depends_on = [
-    aws_cloudformation_stack.data_export,
+    aws_cloudformation_stack.data_export_destination,
     aws_quicksight_account_subscription.subscription,
     aws_quicksight_user.admin,
-  ]
-}
-
-## Provision the stack contain the cora data exports in the management account
-## Deployment of same stack the management account
-resource "aws_cloudformation_stack" "data_export_destination" {
-  capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
-  name         = var.stack_name_cora_data_exports
-  on_failure   = "ROLLBACK"
-  tags         = var.tags
-  template_url = format("%s/cudos/%s", local.stacks_base_url, "data-exports-aggregation.yaml")
-
-  parameters = {
-    "DestinationAccountId" = local.account_id,
-    "EnableSCAD"           = var.enable_scad ? "yes" : "no",
-    "ManageCOH"            = var.enable_compute_optimizization_hub ? "yes" : "no",
-    "ManageCUR2"           = "yes",
-    "SourceAccountIds"     = join(",", local.payer_account_ids),
-  }
-
-  lifecycle {
-    ignore_changes = [
-      capabilities,
-    ]
-  }
-
-  depends_on = [
-    aws_s3_object.cloudformation_templates,
   ]
 }
 
