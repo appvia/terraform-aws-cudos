@@ -23,7 +23,7 @@ locals {
   ## The base URL for the CUDOS dashboards
   cfn_dashboards_base_url = "https://aws-managed-cost-intelligence-dashboards.s3.amazonaws.com/cfn"
   ## The URL for the CUDOS dashboards
-  cfn_dashboards_url = format("%s/cudos/${var.cfn_dashboards_version}/cid-cfn.yml", local.cfn_dashboards_base_url)
+  cfn_dashboards_url = format("%s/${var.cfn_dashboards_version}/cid-cfn.yml", local.cfn_dashboards_base_url)
   ## The data collection bucket path
   data_collection_bucket = format("s3://cid-data-%s", local.account_id)
 }
