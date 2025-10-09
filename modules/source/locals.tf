@@ -1,7 +1,7 @@
 
 locals {
   ## The region where the stack is being deployed
-  region = data.aws_region.current.name
+  region = data.aws_region.current.region
   ## Is the management account id
   management_account_id = data.aws_caller_identity.current.account_id
   ## The s3 bucket name for the cloudformation scripts
