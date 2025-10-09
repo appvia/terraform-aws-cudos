@@ -241,9 +241,11 @@ resource "aws_cloudformation_stack" "data_export_destination" {
 
   parameters = {
     "DestinationAccountId" = local.account_id,
-    "EnableSCAD"           = "no"
-    "ManageCOH"            = "no"
-    "ManageCUR2"           = "no"
+    "EnableSCAD"           = var.enable_scad ? "yes" : "no",
+    "ManageCOH"            = var.enable_compute_optimizization_hub ? "yes" : "no",
+    "ManageCUR2"           = var.enable_curv2 ? "yes" : "no",
+    "ManageFOCUS"          = var.enable_focus ? "yes" : "no",
+    "RolePath"             = "/",
     "SourceAccountIds"     = join(",", local.payer_account_ids),
   }
 
@@ -285,17 +287,12 @@ resource "aws_cloudformation_stack" "dashboards" {
     SecondaryTagName                     = var.data_collection_secondary_tag_name
 
     # Technical Parameters
-    AthenaQueryResultsBucket         = var.athena_query_results_bucket
-    AthenaWorkgroup                  = var.athena_workgroup
-    DatabaseName                     = var.database_name
     DataBucketsKmsKeysArns           = join(",", var.data_buckets_kms_keys_arns)
-    DeploymentType                   = var.deployment_type
-    GlueDataCatalog                  = var.glue_data_catalog
+    DeploymentType                   = "Terraform"
     LambdaLayerBucketPrefix          = var.lambda_layer_bucket_prefix
     QuickSightDataSetRefreshSchedule = var.quicksight_data_set_refresh_schedule
     QuickSightDataSourceRoleName     = var.quicksight_data_source_role_name
     ShareDashboard                   = var.share_dashboard
-    Suffix                           = var.dashboard_suffix
   }
 
   timeouts {
