@@ -273,3 +273,99 @@ variable "enable_compute_optimizization_hub" {
   type        = bool
   default     = false
 }
+
+variable "stack_name_data_exports" {
+  description = "The name of the CloudFormation stack to create the Data Exports"
+  type        = string
+  default     = "CidDataExportsDestinationStack"
+}
+
+variable "enable_lake_formation" {
+  description = "Indicates if the Lake Formation should be enabled"
+  type        = bool
+  default     = false
+}
+
+variable "data_collection_primary_tag_name" {
+  description = "The primary tag name for the data collection"
+  type        = string
+  default     = "Owner"
+}
+
+variable "data_collection_secondary_tag_name" {
+  description = "The secondary tag name for the data collection"
+  type        = string
+  default     = "Environment"
+}
+
+variable "athena_workgroup" {
+  description = "The name of the Athena workgroup"
+  type        = string
+  default     = ""
+}
+
+variable "athena_query_results_bucket" {
+  description = "The name of the Athena query results bucket"
+  type        = string
+  default     = ""
+}
+
+variable "database_name" {
+  description = "The name of the Athena database"
+  type        = string
+  default     = ""
+}
+
+variable "glue_data_catalog" {
+  description = "The name of the Glue data catalog"
+  type        = string
+  default     = "AwsDataCatalog"
+}
+
+variable "dashboard_suffix" {
+  description = "The suffix for the dashboards"
+  type        = string
+  default     = ""
+}
+
+variable "quicksight_data_source_role_name" {
+  description = "The name of the Quicksight data source role"
+  type        = string
+  default     = "CidQuickSightDataSourceRole"
+}
+
+variable "quicksight_data_set_refresh_schedule" {
+  description = "The schedule for the Quicksight data set refresh"
+  type        = string
+  default     = ""
+}
+
+variable "lambda_layer_bucket_prefix" {
+  description = "The prefix for the Lambda layer bucket"
+  type        = string
+  default     = "aws-managed-cost-intelligence-dashboards"
+}
+
+variable "data_buckets_kms_keys_arns" {
+  description = "The ARNs of the KMS keys for the data buckets"
+  type        = list(string)
+  default     = []
+}
+
+variable "deployment_type" {
+  description = "The type of deployment"
+  type        = string
+  default     = "Terraform"
+}
+
+variable "share_dashboard" {
+  description = "Indicates if the dashboard should be shared"
+  type        = string
+  default     = "yes"
+}
+
+variable "cfn_dashboards_version" {
+  description = "The version of the CUDOS dashboards"
+  type        = string
+  default     = "4.3.7"
+}
