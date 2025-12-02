@@ -295,13 +295,13 @@ variable "enable_lake_formation" {
 variable "data_collection_primary_tag_name" {
   description = "The primary tag name for the data collection"
   type        = string
-  default     = "Owner"
+  default     = "owner"
 }
 
 variable "data_collection_secondary_tag_name" {
   description = "The secondary tag name for the data collection"
   type        = string
-  default     = "Environment"
+  default     = "environment"
 }
 
 variable "athena_workgroup" {
