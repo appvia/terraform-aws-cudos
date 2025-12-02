@@ -361,7 +361,7 @@ variable "data_buckets_kms_keys_arns" {
 variable "deployment_type" {
   description = "The type of deployment"
   type        = string
-  default     = "Terraform"
+  default     = null
 }
 
 variable "share_dashboard" {

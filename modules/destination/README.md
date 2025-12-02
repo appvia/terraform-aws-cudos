@@ -17,10 +17,10 @@
 | <a name="input_cfn_dashboards_version"></a> [cfn\_dashboards\_version](#input\_cfn\_dashboards\_version) | The version of the CUDOS dashboards | `string` | `"4.3.7"` | no |
 | <a name="input_dashboard_suffix"></a> [dashboard\_suffix](#input\_dashboard\_suffix) | The suffix for the dashboards | `string` | `""` | no |
 | <a name="input_data_buckets_kms_keys_arns"></a> [data\_buckets\_kms\_keys\_arns](#input\_data\_buckets\_kms\_keys\_arns) | The ARNs of the KMS keys for the data buckets | `list(string)` | `[]` | no |
-| <a name="input_data_collection_primary_tag_name"></a> [data\_collection\_primary\_tag\_name](#input\_data\_collection\_primary\_tag\_name) | The primary tag name for the data collection | `string` | `"Owner"` | no |
-| <a name="input_data_collection_secondary_tag_name"></a> [data\_collection\_secondary\_tag\_name](#input\_data\_collection\_secondary\_tag\_name) | The secondary tag name for the data collection | `string` | `"Environment"` | no |
+| <a name="input_data_collection_primary_tag_name"></a> [data\_collection\_primary\_tag\_name](#input\_data\_collection\_primary\_tag\_name) | The primary tag name for the data collection | `string` | `"owner"` | no |
+| <a name="input_data_collection_secondary_tag_name"></a> [data\_collection\_secondary\_tag\_name](#input\_data\_collection\_secondary\_tag\_name) | The secondary tag name for the data collection | `string` | `"environment"` | no |
 | <a name="input_database_name"></a> [database\_name](#input\_database\_name) | The name of the Athena database | `string` | `""` | no |
-| <a name="input_deployment_type"></a> [deployment\_type](#input\_deployment\_type) | The type of deployment | `string` | `"Terraform"` | no |
+| <a name="input_deployment_type"></a> [deployment\_type](#input\_deployment\_type) | The type of deployment | `string` | `null` | no |
 | <a name="input_enable_backup_module"></a> [enable\_backup\_module](#input\_enable\_backup\_module) | Indicates if the Backup module should be enabled | `bool` | `true` | no |
 | <a name="input_enable_budgets_module"></a> [enable\_budgets\_module](#input\_enable\_budgets\_module) | Indicates if the Budget module should be enabled | `bool` | `true` | no |
 | <a name="input_enable_compute_optimization_hub"></a> [enable\_compute\_optimization\_hub](#input\_enable\_compute\_optimization\_hub) | Indicates if the Compute Optimization Hub components into destination account | `bool` | `true` | no |

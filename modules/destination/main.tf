@@ -295,7 +295,7 @@ resource "aws_cloudformation_stack" "dashboards" {
     AthenaWorkgroup                  = try(var.athena_workgroup, "")
     DatabaseName                     = try(var.database_name, "")
     DataBucketsKmsKeysArns           = try(join(",", var.data_buckets_kms_keys_arns), "")
-    DeploymentType                   = try(var.deployment_type, "Lambda")
+    DeploymentType                   = try(var.deployment_type, ""),
     GlueDataCatalog                  = try(var.glue_data_catalog, "")
     LambdaLayerBucketPrefix          = try(var.lambda_layer_bucket_prefix, "")
     QuickSightDataSetRefreshSchedule = try(var.quicksight_data_set_refresh_schedule, "")
