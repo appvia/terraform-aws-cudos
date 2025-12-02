@@ -233,7 +233,10 @@ module "dashboard_bucket" {
 ## Provision the stack contain the cora data exports in the management account
 ## Deployment of same stack the management account
 resource "aws_cloudformation_stack" "data_export_destination" {
-  capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
+  capabilities = [
+    "CAPABILITY_NAMED_IAM",
+    "CAPABILITY_AUTO_EXPAND",
+  ]
   name         = var.stack_name_data_exports
   on_failure   = "ROLLBACK"
   tags         = var.tags
@@ -259,7 +262,11 @@ resource "aws_cloudformation_stack" "data_export_destination" {
 
 ## Provision the cloud intelligence dashboards
 resource "aws_cloudformation_stack" "dashboards" {
-  name         = var.stack_name_cloud_intelligence
+  name = var.stack_name_cloud_intelligence
+  capabilities = [
+    "CAPABILITY_NAMED_IAM",
+    "CAPABILITY_AUTO_EXPAND",
+  ]
   tags         = var.tags
   template_url = local.cfn_dashboards_url
 
