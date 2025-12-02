@@ -247,6 +247,7 @@ resource "aws_cloudformation_stack" "data_export_destination" {
     "EnableSCAD"           = var.enable_scad ? "yes" : "no",
     "ManageCOH"            = var.enable_compute_optimizization_hub ? "yes" : "no",
     "ManageCUR2"           = "yes"
+    "SourceAccountIds"     = join(",", local.payer_account_ids),
   }
 
   lifecycle {
