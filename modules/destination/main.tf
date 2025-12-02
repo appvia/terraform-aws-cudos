@@ -232,7 +232,7 @@ module "dashboard_bucket" {
 
 ## Provision the stack contain the cora data exports in the management account
 ## Deployment of same stack the management account
-resource "aws_cloudformation_stack" "data_export" {
+resource "aws_cloudformation_stack" "data_export_destination" {
   capabilities = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
   name         = var.stack_name_data_exports
   on_failure   = "ROLLBACK"
@@ -303,7 +303,7 @@ resource "aws_cloudformation_stack" "dashboards" {
   }
 
   depends_on = [
-    aws_cloudformation_stack.data_export,
+    aws_cloudformation_stack.data_export_destination,
     aws_quicksight_account_subscription.subscription,
     aws_quicksight_user.admin,
   ]
@@ -334,7 +334,7 @@ resource "aws_cloudformation_stack" "cudos_data_collection" {
   }
 
   depends_on = [
-    aws_cloudformation_stack.data_export,
+    aws_cloudformation_stack.data_export_destination,
     aws_s3_object.cloudformation_templates,
   ]
 }
