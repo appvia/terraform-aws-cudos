@@ -194,6 +194,18 @@ variable "enable_cudos_v5_dashboard" {
   default     = true
 }
 
+variable "enable_scad" {
+  description = "Indicates if the SCAD ingestion components into destination account"
+  type        = bool
+  default     = false
+}
+
+variable "enable_compute_optimization_hub" {
+  description = "Indicates if the Compute Optimization Hub components into destination account"
+  type        = bool
+  default     = true
+}
+
 variable "enable_cudos_dashboard" {
   description = "Indicates if the CUDOS dashboard should be enabled"
   type        = bool

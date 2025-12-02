@@ -241,9 +241,9 @@ resource "aws_cloudformation_stack" "data_export" {
 
   parameters = {
     "DestinationAccountId" = local.account_id,
-    "EnableSCAD"           = "no",
-    "ManageCOH"            = "no"
-    "ManageCUR2"           = "no",
+    "EnableSCAD"           = var.enable_scad ? "yes" : "no",
+    "ManageCOH"            = var.enable_compute_optimizization_hub ? "yes" : "no",
+    "ManageCUR2"           = "yes"
   }
 
   lifecycle {
