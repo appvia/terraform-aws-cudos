@@ -287,21 +287,21 @@ resource "aws_cloudformation_stack" "dashboards" {
 
     # Optimization Parameters
     OptimizationDataCollectionBucketPath = local.data_collection_bucket
-    PrimaryTagName                       = var.data_collection_primary_tag_name
-    SecondaryTagName                     = var.data_collection_secondary_tag_name
+    PrimaryTagName                       = try(var.data_collection_primary_tag_name, "owner")
+    SecondaryTagName                     = try(var.data_collection_secondary_tag_name, "environment")
 
     # Technical Parameters
-    AthenaQueryResultsBucket         = var.athena_query_results_bucket
-    AthenaWorkgroup                  = var.athena_workgroup
-    DatabaseName                     = var.database_name
-    DataBucketsKmsKeysArns           = join(",", var.data_buckets_kms_keys_arns)
-    DeploymentType                   = var.deployment_type
-    GlueDataCatalog                  = var.glue_data_catalog
-    LambdaLayerBucketPrefix          = var.lambda_layer_bucket_prefix
-    QuickSightDataSetRefreshSchedule = var.quicksight_data_set_refresh_schedule
-    QuickSightDataSourceRoleName     = var.quicksight_data_source_role_name
-    ShareDashboard                   = var.share_dashboard
-    Suffix                           = var.dashboard_suffix
+    AthenaQueryResultsBucket         = try(var.athena_query_results_bucket, "")
+    AthenaWorkgroup                  = try(var.athena_workgroup, "")
+    DatabaseName                     = try(var.database_name, "")
+    DataBucketsKmsKeysArns           = try(join(",", var.data_buckets_kms_keys_arns), "")
+    DeploymentType                   = try(var.deployment_type, "Terraform")
+    GlueDataCatalog                  = try(var.glue_data_catalog, "")
+    LambdaLayerBucketPrefix          = try(var.lambda_layer_bucket_prefix, "")
+    QuickSightDataSetRefreshSchedule = try(var.quicksight_data_set_refresh_schedule, "")
+    QuickSightDataSourceRoleName     = try(var.quicksight_data_source_role_name, "")
+    ShareDashboard                   = try(var.share_dashboard, "yes")
+    Suffix                           = try(var.dashboard_suffix, "")
   }
 
   timeouts {
