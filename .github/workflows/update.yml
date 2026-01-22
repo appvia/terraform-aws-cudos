@@ -27,7 +27,7 @@ jobs:
           pull-request-title: CUDOS Template Update
           template-repository: awslabs/cid-data-collection-framework
           template-files: |
-            data-collection/deploy/deploy-data-collection.yaml:modules/destinations/assets/cloudformation/cudos
+            data-collection/deploy/deploy-data-collection.yaml:modules/destination/assets/cloudformation/cudos
             data-exports/deploy/data-exports-aggregation.yaml:assets/cloudformation/cudos
       - name: Create Pull Request
         if: success()
