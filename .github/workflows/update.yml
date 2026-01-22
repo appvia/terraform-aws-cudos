@@ -1,0 +1,70 @@
+---
+name: Update Templates
+on:
+  schedule:
+    - cron: "0 0 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  update-data-collection-template:
+    name: Update Data Collection Template
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+      - name: Copying Upstream Files
+        uses: appvia/appvia-cicd-workflows/.github/actions/template-update@main
+        with:
+          base-directory: modules/destinations/assets/cloudformation/cudos
+          branch-name: cudos-data-template
+          pull-request-title: CUDOS Data Collection Template
+          template-repository: awslabs/cid-data-collection-framework
+          template-files: |
+            data-collection/deploy/deploy-data-collection.yaml
+      - name: Create Pull Request
+        if: success()
+        uses: peter-evans/create-pull-request@v8
+        with:
+          base: main
+          body: "This PR updates the Data Collection Cloudformation template"
+          branch-suffix: timestamp
+          labels: "chore"
+          reviewers: gambol99
+          title: "chore: data collection template"
+
+  update-data-template:
+    name: Update Data Template
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+      - name: Copying Upstream Files
+        uses: appvia/appvia-cicd-workflows/.github/actions/template-update@main
+        with:
+          base-directory: assets/cloudformation/cudos
+          branch-name: cudos-data-template
+          pull-request-title: Data Exports Template
+          template-repository: awslabs/cid-data-collection-framework
+          template-files: |
+            data-exports/deploy/data-exports-aggregation.yaml
+      - name: Create Pull Request
+        if: success()
+        uses: peter-evans/create-pull-request@v8
+        with:
+          base: main
+          body: "This PR updates the Data Exports Cloudformation template"
+          branch-suffix: timestamp
+          labels: "chore"
+          reviewers: gambol99
+          title: "chore: data exports template"
