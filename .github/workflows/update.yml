@@ -11,8 +11,8 @@ permissions:
   id-token: write
 
 jobs:
-  update-data-collection-template:
-    name: Update Data Collection Template
+  update-template:
+    name: Update Templates
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -23,12 +23,12 @@ jobs:
       - name: Copying Upstream Files
         uses: appvia/appvia-cicd-workflows/.github/actions/template-update@main
         with:
-          base-directory: modules/destinations/assets/cloudformation/cudos
-          branch-name: cudos-data-template
-          pull-request-title: CUDOS Data Collection Template
+          branch-name: cudos-template-update
+          pull-request-title: CUDOS Template Update
           template-repository: awslabs/cid-data-collection-framework
           template-files: |
-            data-collection/deploy/deploy-data-collection.yaml
+            data-collection/deploy/deploy-data-collection.yaml:modules/destinations/assets/cloudformation/cudos
+            data-exports/deploy/data-exports-aggregation.yaml:assets/cloudformation/cudos
       - name: Create Pull Request
         if: success()
         uses: peter-evans/create-pull-request@v8
@@ -39,32 +39,3 @@ jobs:
           labels: "chore"
           reviewers: gambol99
           title: "chore: data collection template"
-
-  update-data-template:
-    name: Update Data Template
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: .
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v6
-      - name: Copying Upstream Files
-        uses: appvia/appvia-cicd-workflows/.github/actions/template-update@main
-        with:
-          base-directory: assets/cloudformation/cudos
-          branch-name: cudos-data-template
-          pull-request-title: Data Exports Template
-          template-repository: awslabs/cid-data-collection-framework
-          template-files: |
-            data-exports/deploy/data-exports-aggregation.yaml
-      - name: Create Pull Request
-        if: success()
-        uses: peter-evans/create-pull-request@v8
-        with:
-          base: main
-          body: "This PR updates the Data Exports Cloudformation template"
-          branch-suffix: timestamp
-          labels: "chore"
-          reviewers: gambol99
-          title: "chore: data exports template"
