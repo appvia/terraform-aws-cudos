@@ -4,6 +4,11 @@ output "cloudformation_bucket_arn" {
   value       = module.cloudformation.s3_bucket_arn
 }
 
+output "cloudformation_templates_prefix" {
+  description = "The S3 key prefix (includes hash) for CloudFormation templates"
+  value       = local.stacks_templates_prefix
+}
+
 output "destination_bucket_name" {
   description = "The name of the bucket where to replicate the data from the CUR"
   value       = format("cid-%s-local-assets", local.account_id)

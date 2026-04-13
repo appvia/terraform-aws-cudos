@@ -7,6 +7,13 @@ locals {
   region = data.aws_region.current.region
   ## The URL for the s3 bucket containing cloudformation scripts
   stacks_base_url = format("https://%s.s3.%s.amazonaws.com", var.cloudformation_bucket_name, local.region)
+  ## Hash of all CloudFormation templates to force stack updates when they change
+  stacks_templates_hash = md5(join(",", [
+    for template in sort(fileset("${path.module}/assets/cloudformation/", "**/*.yaml")) :
+    format("%s:%s", template, filemd5("${path.module}/assets/cloudformation/${template}"))
+  ]))
+  ## Prefix used for versioned templates in S3
+  stacks_templates_prefix = format("revisions/%s", local.stacks_templates_hash)
   ## Indicates if we should provision the quicksight admin user
 
   ## Is the user mappings for the quicksight groups - combined for both IAM and QuickSight users

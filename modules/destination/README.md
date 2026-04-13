@@ -78,6 +78,7 @@
 | ---- | ----------- |
 | <a name="output_cfn_dashboards_version"></a> [cfn\_dashboards\_version](#output\_cfn\_dashboards\_version) | The version of the CUDOS dashboards |
 | <a name="output_cloudformation_bucket_arn"></a> [cloudformation\_bucket\_arn](#output\_cloudformation\_bucket\_arn) | The name of the bucket where to store the CloudFormation |
+| <a name="output_cloudformation_templates_prefix"></a> [cloudformation\_templates\_prefix](#output\_cloudformation\_templates\_prefix) | The S3 key prefix (includes hash) for CloudFormation templates |
 | <a name="output_dashboard_bucket_arn"></a> [dashboard\_bucket\_arn](#output\_dashboard\_bucket\_arn) | The name of the bucket where to store the dashboards |
 | <a name="output_destination_bucket_arn"></a> [destination\_bucket\_arn](#output\_destination\_bucket\_arn) | The name of the bucket where to replicate the data from the CUR |
 | <a name="output_destination_bucket_name"></a> [destination\_bucket\_name](#output\_destination\_bucket\_name) | The name of the bucket where to replicate the data from the CUR |
