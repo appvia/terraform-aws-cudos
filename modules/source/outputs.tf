@@ -14,4 +14,9 @@ output "cloudformation_bucket_url" {
   value       = format("https://%s.s3.%s.amazonaws.com", var.stacks_bucket_name, local.region)
 }
 
+output "cloudformation_templates_prefix" {
+  description = "The S3 key prefix (includes hash) for CloudFormation templates"
+  value       = local.stacks_templates_prefix
+}
+
 
