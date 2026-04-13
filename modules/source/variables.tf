@@ -26,12 +26,6 @@ variable "resource_prefix" {
   default     = "cid"
 }
 
-variable "time_granularity" {
-  description = "The granularity of the time for the data exports"
-  type        = string
-  default     = "HOURLY"
-}
-
 variable "enable_backup_module" {
   description = "Indicates if the Backup module should be enabled"
   type        = bool

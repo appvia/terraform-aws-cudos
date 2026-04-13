@@ -96,7 +96,6 @@ resource "aws_cloudformation_stack" "data_export_management" {
     ResourcePrefix       = var.resource_prefix
     RolePath             = "/"
     SourceAccountIds     = join(",", [local.management_account_id])
-    TimeGranularity      = var.time_granularity
   }
 
   lifecycle {
