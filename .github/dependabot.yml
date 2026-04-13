@@ -6,6 +6,10 @@ updates:
     schedule:
       interval: weekly
   - package-ecosystem: terraform
-    directory: /
+    directory: modules/source
+    schedule:
+      interval: weekly
+  - package-ecosystem: terraform
+    directory: modules/destination
     schedule:
       interval: weekly
