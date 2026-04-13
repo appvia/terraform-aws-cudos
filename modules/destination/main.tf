@@ -203,7 +203,7 @@ data "aws_iam_policy_document" "dashboards_bucket_policy" {
 # tfsec:ignore:aws-s3-enable-bucket-logging
 module "dashboard_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "4.11.0"
+  version = "5.12.0"
 
   attach_policy           = true
   block_public_acls       = true
