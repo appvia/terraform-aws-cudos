@@ -26,8 +26,7 @@ module "destination" {
   quicksight_dashboard_owner = "admin"
 
   providers = {
-    aws           = aws.cost_analysis
-    aws.us_east_1 = aws.cost_analysis_us_east_1
+    aws = aws.cost_analysis
   }
 }
 
@@ -48,8 +47,7 @@ module "source" {
   tags                          = var.tags
 
   providers = {
-    aws           = aws.management
-    aws.us_east_1 = aws.management_us_east_1
+    aws = aws.management
   }
 }
 
