@@ -4,5 +4,13 @@
     "config:recommended",
     ":semanticCommitTypeAll(chore)",
     "schedule:earlyMondays"
+  ],
+  "packageRules": [
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "pinDigests": true
+    }
   ]
 }
