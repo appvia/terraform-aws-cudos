@@ -7,7 +7,7 @@ resource "aws_quicksight_group" "groups" {
   namespace   = each.value.namespace
 }
 
-## Provision any users within QuickSight 
+## Provision any users within QuickSight
 resource "aws_quicksight_user" "users" {
   for_each = var.quicksight_users
 

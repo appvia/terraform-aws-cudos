@@ -69,12 +69,6 @@ variable "stack_name_collectors" {
   default     = "CidDataCollectionStack"
 }
 
-variable "stack_name_cora_data_exports" {
-  description = "The name of the CloudFormation stack to create the Data Exports"
-  type        = string
-  default     = "CidDataExportsDestinationStack"
-}
-
 variable "dashboards_bucket_name" {
   description = "The name of the bucket to store the dashboards configurations"
   type        = string
@@ -195,15 +189,15 @@ variable "enable_cudos_v5_dashboard" {
 }
 
 variable "enable_compute_optimization_hub" {
-  description = "Indicates if the Compute Optimization Hub components into destination account"
-  type        = bool
-  default     = true
-}
-
-variable "enable_cudos_dashboard" {
-  description = "Indicates if the CUDOS dashboard should be enabled"
+  description = "Indicates if the Compute Optimization Hub components should be enabled in the destination account"
   type        = bool
   default     = false
+}
+
+variable "enable_cur2" {
+  description = "Indicates if CUR 2.0 data exports should be enabled in the destination account"
+  type        = bool
+  default     = true
 }
 
 variable "enable_compute_optimizer_dashboard" {
@@ -272,12 +266,6 @@ variable "quicksight_users" {
     role          = optional(string, "READER")
   }))
   default = {}
-}
-
-variable "enable_compute_optimizization_hub" {
-  description = "Indicates if the Compute Optimizization Hub module should be enabled"
-  type        = bool
-  default     = false
 }
 
 variable "stack_name_data_exports" {

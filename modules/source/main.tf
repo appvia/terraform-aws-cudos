@@ -90,12 +90,13 @@ resource "aws_cloudformation_stack" "data_export_management" {
   parameters = {
     DestinationAccountId = var.destination_account_id
     EnableSCAD           = var.enable_scad ? "yes" : "no",
-    ManageCOH            = var.enable_compute_optimizization_hub ? "yes" : "no",
+    ManageCOH            = var.enable_compute_optimization_hub ? "yes" : "no",
     ManageCUR2           = var.enable_cur2 ? "yes" : "no"
     ManageFOCUS          = var.enable_focus ? "yes" : "no"
     ResourcePrefix       = var.resource_prefix
     RolePath             = "/"
     SourceAccountIds     = join(",", [local.management_account_id])
+    CUR2TimeGranularity  = var.cur2_time_granularity
   }
 
   lifecycle {
@@ -130,6 +131,7 @@ resource "aws_cloudformation_stack" "cudos_read_permissions" {
     "IncludeECSChargebackModule"      = var.enable_ecs_chargeback_module ? "yes" : "no",
     "IncludeHealthEventsModule"       = var.enable_health_events_module ? "yes" : "no"
     "IncludeInventoryCollectorModule" = var.enable_inventory_module ? "yes" : "no",
+    "IncludeLicenseManagerModule"     = var.enable_license_manager_module ? "yes" : "no",
     "IncludeRDSUtilizationModule"     = var.enable_rds_utilization_module ? "yes" : "no",
     "IncludeRightsizingModule"        = var.enable_rightsizing_module ? "yes" : "no",
     "IncludeTAModule"                 = var.enable_tao_module ? "yes" : "no",

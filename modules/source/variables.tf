@@ -4,8 +4,13 @@ variable "destination_account_id" {
 }
 
 variable "destination_bucket_arn" {
-  description = "The ARN of the bucket where to replicate the data from the CUR"
+  description = "S3 URI of the CID data collection bucket in the destination account (e.g. s3://cid-123456789012-local-assets). Passed to the data exports stack as SecondaryDestinationBucket."
   type        = string
+
+  validation {
+    condition     = can(regex("^s3://[a-z0-9][a-z0-9.-]{1,61}[a-z0-9](/.*)?$", var.destination_bucket_arn))
+    error_message = "destination_bucket_arn must be a valid S3 URI (e.g. s3://cid-123456789012-local-assets)."
+  }
 }
 
 variable "enable_focus" {
@@ -44,10 +49,27 @@ variable "enable_compute_optimizer_module" {
   default     = true
 }
 
-variable "enable_compute_optimizization_hub" {
-  description = "Indicates if the Compute Optimizization Hub module should be enabled"
+variable "enable_compute_optimization_hub" {
+  description = "Indicates if the Compute Optimization Hub module should be enabled"
   type        = bool
   default     = false
+}
+
+variable "enable_license_manager_module" {
+  description = "Indicates if the License Manager module should be enabled"
+  type        = bool
+  default     = false
+}
+
+variable "cur2_time_granularity" {
+  description = "CUR 2.0 export time granularity. Changing this requires stack redeployment and data backfill."
+  type        = string
+  default     = "HOURLY"
+
+  validation {
+    condition     = contains(["HOURLY", "DAILY", "MONTHLY"], var.cur2_time_granularity)
+    error_message = "cur2_time_granularity must be HOURLY, DAILY, or MONTHLY."
+  }
 }
 
 variable "enable_cost_anomaly_module" {
