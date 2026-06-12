@@ -45,6 +45,23 @@ variable "enable_compute_optimization_hub" {
   default     = false
 }
 
+variable "enable_license_manager_module" {
+  description = "Indicates if the License Manager module should be enabled"
+  type        = bool
+  default     = false
+}
+
+variable "cur2_time_granularity" {
+  description = "CUR 2.0 export time granularity. Changing this requires stack redeployment and data backfill."
+  type        = string
+  default     = "HOURLY"
+
+  validation {
+    condition     = contains(["HOURLY", "DAILY", "MONTHLY"], var.cur2_time_granularity)
+    error_message = "cur2_time_granularity must be HOURLY, DAILY, or MONTHLY."
+  }
+}
+
 variable "enable_cost_anomaly_module" {
   description = "Indicates if the Cost Anomaly module should be enabled"
   type        = bool

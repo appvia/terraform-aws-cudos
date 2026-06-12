@@ -74,6 +74,12 @@ variable "enable_cost_anomaly_module" {
   default     = true
 }
 
+variable "enable_cur2" {
+  description = "Indicates if the CUR2 module should be enabled"
+  type        = bool
+  default     = true
+}
+
 variable "enable_scad" {
   description = "Indicates if the SCAD module should be enabled, only available when Cora enabled"
   type        = bool
@@ -226,8 +232,8 @@ variable "quicksight_users" {
   default = {}
 }
 
-variable "enable_compute_optimizization_hub" {
-  description = "Indicates if the Compute Optimizization Hub module should be enabled"
+variable "enable_compute_optimization_hub" {
+  description = "Indicates if the Compute Optimization Hub module should be enabled"
   type        = bool
   default     = false
 }
