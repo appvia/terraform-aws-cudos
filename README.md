@@ -521,7 +521,6 @@ To update the README:
 3. Run: `terraform-docs markdown table --output-file README.md --output-mode inject .`
 
 Manual edits should be made above the `<!-- BEGIN_TF_DOCS -->
-
 ## Providers
 
 No providers.
@@ -533,5 +532,4 @@ No inputs.
 ## Outputs
 
 No outputs.
-
 <!-- END_TF_DOCS -->
