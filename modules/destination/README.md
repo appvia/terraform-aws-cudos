@@ -2,13 +2,13 @@
 ## Providers
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.0 |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-| ---- | ----------- | ---- | ------- | :------: |
+|------|-------------|------|---------|:--------:|
 | <a name="input_cloudformation_bucket_name"></a> [cloudformation\_bucket\_name](#input\_cloudformation\_bucket\_name) | The name of the bucket to store the CloudFormation | `string` | n/a | yes |
 | <a name="input_dashboards_bucket_name"></a> [dashboards\_bucket\_name](#input\_dashboards\_bucket\_name) | The name of the bucket to store the dashboards configurations | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to all resources | `map(string)` | n/a | yes |
@@ -23,13 +23,11 @@
 | <a name="input_deployment_type"></a> [deployment\_type](#input\_deployment\_type) | The type of deployment | `string` | `null` | no |
 | <a name="input_enable_backup_module"></a> [enable\_backup\_module](#input\_enable\_backup\_module) | Indicates if the Backup module should be enabled | `bool` | `true` | no |
 | <a name="input_enable_budgets_module"></a> [enable\_budgets\_module](#input\_enable\_budgets\_module) | Indicates if the Budget module should be enabled | `bool` | `true` | no |
-| <a name="input_enable_compute_optimization_hub"></a> [enable\_compute\_optimization\_hub](#input\_enable\_compute\_optimization\_hub) | Indicates if the Compute Optimization Hub components into destination account | `bool` | `true` | no |
 | <a name="input_enable_compute_optimizer_dashboard"></a> [enable\_compute\_optimizer\_dashboard](#input\_enable\_compute\_optimizer\_dashboard) | Indicates if the Compute Optimizer dashboard should be enabled | `bool` | `true` | no |
 | <a name="input_enable_compute_optimizer_module"></a> [enable\_compute\_optimizer\_module](#input\_enable\_compute\_optimizer\_module) | Indicates if the Compute Optimizer module should be enabled | `bool` | `true` | no |
 | <a name="input_enable_compute_optimizization_hub"></a> [enable\_compute\_optimizization\_hub](#input\_enable\_compute\_optimizization\_hub) | Indicates if the Compute Optimizization Hub module should be enabled | `bool` | `false` | no |
 | <a name="input_enable_cost_anomaly_module"></a> [enable\_cost\_anomaly\_module](#input\_enable\_cost\_anomaly\_module) | Indicates if the Cost Anomaly module should be enabled | `bool` | `true` | no |
 | <a name="input_enable_cost_intelligence_dashboard"></a> [enable\_cost\_intelligence\_dashboard](#input\_enable\_cost\_intelligence\_dashboard) | Indicates if the Cost Intelligence dashboard should be enabled | `bool` | `true` | no |
-| <a name="input_enable_cudos_dashboard"></a> [enable\_cudos\_dashboard](#input\_enable\_cudos\_dashboard) | Indicates if the CUDOS dashboard should be enabled | `bool` | `false` | no |
 | <a name="input_enable_cudos_v5_dashboard"></a> [enable\_cudos\_v5\_dashboard](#input\_enable\_cudos\_v5\_dashboard) | Indicates if the CUDOS V5 framework should be enabled | `bool` | `true` | no |
 | <a name="input_enable_ecs_chargeback_module"></a> [enable\_ecs\_chargeback\_module](#input\_enable\_ecs\_chargeback\_module) | Indicates if the ECS Chargeback module should be enabled | `bool` | `false` | no |
 | <a name="input_enable_health_events_module"></a> [enable\_health\_events\_module](#input\_enable\_health\_events\_module) | Indicates if the Health Events module should be enabled | `bool` | `true` | no |
@@ -41,11 +39,10 @@
 | <a name="input_enable_prerequisites_quicksight"></a> [enable\_prerequisites\_quicksight](#input\_enable\_prerequisites\_quicksight) | Indicates if the prerequisites for QuickSight should be enabled | `bool` | `true` | no |
 | <a name="input_enable_prerequisites_quicksight_permissions"></a> [enable\_prerequisites\_quicksight\_permissions](#input\_enable\_prerequisites\_quicksight\_permissions) | Indicates if the prerequisites for QuickSight permissions should be enabled | `bool` | `true` | no |
 | <a name="input_enable_quicksight_admin"></a> [enable\_quicksight\_admin](#input\_enable\_quicksight\_admin) | Enable the creation of an admin user (var.quicksight\_admin\_username) in QuickSight | `bool` | `true` | no |
-| <a name="input_enable_quicksight_subscription"></a> [enable\_quicksight\_subscription](#input\_enable\_quicksight\_subscription) | Enable QuickSight subscription | `bool` | `false` | no |
 | <a name="input_enable_rds_utilization_module"></a> [enable\_rds\_utilization\_module](#input\_enable\_rds\_utilization\_module) | Indicates if the RDS Utilization module should be enabled | `bool` | `true` | no |
 | <a name="input_enable_rightsizing_module"></a> [enable\_rightsizing\_module](#input\_enable\_rightsizing\_module) | Indicates if the Rightsizing module should be enabled | `bool` | `true` | no |
 | <a name="input_enable_scad"></a> [enable\_scad](#input\_enable\_scad) | Indicates if the SCAD module should be enabled, only available when Cora enabled | `bool` | `false` | no |
-| <a name="input_enable_sso"></a> [enable\_sso](#input\_enable\_sso) | Enable integration with identity center for QuickSight | `bool` | `true` | no |
+| <a name="input_enable_sso"></a> [enable\_sso](#input\_enable\_sso) | Enable integration with identity center for QuickSight (DEPRECATED) | `bool` | `true` | no |
 | <a name="input_enable_tao_dashboard"></a> [enable\_tao\_dashboard](#input\_enable\_tao\_dashboard) | Indicates if the TAO dashboard should be enabled | `bool` | `false` | no |
 | <a name="input_enable_tao_module"></a> [enable\_tao\_module](#input\_enable\_tao\_module) | Indicates if the TAO module should be enabled | `bool` | `true` | no |
 | <a name="input_enable_transit_gateway_module"></a> [enable\_transit\_gateway\_module](#input\_enable\_transit\_gateway\_module) | Indicates if the Transit Gateway module should be enabled | `bool` | `true` | no |
@@ -58,24 +55,19 @@
 | <a name="input_quicksight_data_set_refresh_schedule"></a> [quicksight\_data\_set\_refresh\_schedule](#input\_quicksight\_data\_set\_refresh\_schedule) | The schedule for the Quicksight data set refresh | `string` | `""` | no |
 | <a name="input_quicksight_data_source_role_name"></a> [quicksight\_data\_source\_role\_name](#input\_quicksight\_data\_source\_role\_name) | The name of the Quicksight data source role | `string` | `"CidQuickSightDataSourceRole"` | no |
 | <a name="input_quicksight_groups"></a> [quicksight\_groups](#input\_quicksight\_groups) | Map of groups with user membership to be added to QuickSight | <pre>map(object({<br/>    description = optional(string)<br/>    namespace   = optional(string)<br/>    members     = optional(list(string), [])<br/>  }))</pre> | `{}` | no |
-| <a name="input_quicksight_subscription_account_name"></a> [quicksight\_subscription\_account\_name](#input\_quicksight\_subscription\_account\_name) | The account name for the QuickSight quicksight\_subscription edition | `string` | `null` | no |
-| <a name="input_quicksight_subscription_authentication_method"></a> [quicksight\_subscription\_authentication\_method](#input\_quicksight\_subscription\_authentication\_method) | The identity for the QuickSight quicksight\_subscription edition | `string` | `"IAM_AND_QUICKSIGHT"` | no |
-| <a name="input_quicksight_subscription_edition"></a> [quicksight\_subscription\_edition](#input\_quicksight\_subscription\_edition) | The edition for the QuickSight quicksight\_subscription | `string` | `"ENTERPRISE"` | no |
-| <a name="input_quicksight_subscription_email"></a> [quicksight\_subscription\_email](#input\_quicksight\_subscription\_email) | The email address for the QuickSight quicksight\_subscription edition | `string` | `null` | no |
 | <a name="input_quicksight_users"></a> [quicksight\_users](#input\_quicksight\_users) | Map of user accounts to be registered in QuickSight | <pre>map(object({<br/>    identity_type = string<br/>    namespace     = optional(string, "default")<br/>    role          = optional(string, "READER")<br/>  }))</pre> | `{}` | no |
-| <a name="input_saml_iam_role_name"></a> [saml\_iam\_role\_name](#input\_saml\_iam\_role\_name) | Name of the role all authentication users are initially given | `string` | `"aws-cudos-sso"` | no |
+| <a name="input_saml_iam_role_name"></a> [saml\_iam\_role\_name](#input\_saml\_iam\_role\_name) | Name of the role all authentication users are initially given (DEPRECATED) | `string` | `"aws-cudos-sso"` | no |
 | <a name="input_saml_metadata"></a> [saml\_metadata](#input\_saml\_metadata) | The configuration for the SAML identity provider | `string` | `""` | no |
 | <a name="input_saml_provider_name"></a> [saml\_provider\_name](#input\_saml\_provider\_name) | The name of the SAML provider | `string` | `"aws-cudos-sso"` | no |
 | <a name="input_share_dashboard"></a> [share\_dashboard](#input\_share\_dashboard) | Indicates if the dashboard should be shared | `string` | `"yes"` | no |
 | <a name="input_stack_name_cloud_intelligence"></a> [stack\_name\_cloud\_intelligence](#input\_stack\_name\_cloud\_intelligence) | The name of the CloudFormation stack to create the dashboards | `string` | `"CI-Cloud-Intelligence-Dashboards"` | no |
 | <a name="input_stack_name_collectors"></a> [stack\_name\_collectors](#input\_stack\_name\_collectors) | The name of the CloudFormation stack to create the collectors | `string` | `"CidDataCollectionStack"` | no |
-| <a name="input_stack_name_cora_data_exports"></a> [stack\_name\_cora\_data\_exports](#input\_stack\_name\_cora\_data\_exports) | The name of the CloudFormation stack to create the Data Exports | `string` | `"CidDataExportsDestinationStack"` | no |
 | <a name="input_stack_name_data_exports"></a> [stack\_name\_data\_exports](#input\_stack\_name\_data\_exports) | The name of the CloudFormation stack to create the Data Exports | `string` | `"CidDataExportsDestinationStack"` | no |
 
 ## Outputs
 
 | Name | Description |
-| ---- | ----------- |
+|------|-------------|
 | <a name="output_cfn_dashboards_version"></a> [cfn\_dashboards\_version](#output\_cfn\_dashboards\_version) | The version of the CUDOS dashboards |
 | <a name="output_cloudformation_bucket_arn"></a> [cloudformation\_bucket\_arn](#output\_cloudformation\_bucket\_arn) | The name of the bucket where to store the CloudFormation |
 | <a name="output_cloudformation_templates_prefix"></a> [cloudformation\_templates\_prefix](#output\_cloudformation\_templates\_prefix) | The S3 key prefix (includes hash) for CloudFormation templates |

@@ -92,16 +92,6 @@ resource "aws_s3_object" "cloudformation_templates" {
   source                 = "${path.module}/assets/cloudformation/${each.value}"
 }
 
-## Provision enterprise quicksight if enabled
-resource "aws_quicksight_account_subscription" "subscription" {
-  count = var.enable_quicksight_subscription ? 1 : 0
-
-  account_name          = var.quicksight_subscription_account_name
-  authentication_method = var.quicksight_subscription_authentication_method
-  edition               = var.quicksight_subscription_edition
-  notification_email    = var.quicksight_subscription_email
-}
-
 ## Provision a administator user in quicksight
 resource "aws_quicksight_user" "admin" {
   count = var.enable_quicksight_admin ? 1 : 0
@@ -312,7 +302,6 @@ resource "aws_cloudformation_stack" "dashboards" {
 
   depends_on = [
     aws_cloudformation_stack.data_export_destination,
-    aws_quicksight_account_subscription.subscription,
     aws_quicksight_user.admin,
   ]
 }

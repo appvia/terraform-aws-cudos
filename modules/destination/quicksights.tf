@@ -33,4 +33,3 @@ resource "aws_quicksight_group_membership" "members" {
 
   depends_on = [aws_quicksight_user.users]
 }
-

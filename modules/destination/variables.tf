@@ -15,12 +15,6 @@ variable "payer_accounts" {
   default     = []
 }
 
-variable "enable_quicksight_subscription" {
-  description = "Enable QuickSight subscription"
-  type        = bool
-  default     = false
-}
-
 variable "saml_provider_name" {
   description = "The name of the SAML provider"
   type        = string
@@ -28,33 +22,9 @@ variable "saml_provider_name" {
 }
 
 variable "saml_iam_role_name" {
-  description = "Name of the role all authentication users are initially given"
+  description = "Name of the role all authentication users are initially given (DEPRECATED)"
   type        = string
   default     = "aws-cudos-sso"
-}
-
-variable "quicksight_subscription_email" {
-  description = "The email address for the QuickSight quicksight_subscription edition"
-  type        = string
-  default     = null
-}
-
-variable "quicksight_subscription_authentication_method" {
-  description = "The identity for the QuickSight quicksight_subscription edition"
-  type        = string
-  default     = "IAM_AND_QUICKSIGHT"
-}
-
-variable "quicksight_subscription_edition" {
-  description = "The edition for the QuickSight quicksight_subscription"
-  type        = string
-  default     = "ENTERPRISE"
-}
-
-variable "quicksight_subscription_account_name" {
-  description = "The account name for the QuickSight quicksight_subscription edition"
-  type        = string
-  default     = null
 }
 
 variable "stack_name_cloud_intelligence" {
@@ -67,12 +37,6 @@ variable "stack_name_collectors" {
   description = "The name of the CloudFormation stack to create the collectors"
   type        = string
   default     = "CidDataCollectionStack"
-}
-
-variable "stack_name_cora_data_exports" {
-  description = "The name of the CloudFormation stack to create the Data Exports"
-  type        = string
-  default     = "CidDataExportsDestinationStack"
 }
 
 variable "dashboards_bucket_name" {
@@ -99,7 +63,7 @@ variable "quicksight_admin_email" {
 }
 
 variable "enable_sso" {
-  description = "Enable integration with identity center for QuickSight"
+  description = "Enable integration with identity center for QuickSight (DEPRECATED)"
   type        = bool
   default     = true
 }
@@ -192,18 +156,6 @@ variable "enable_cudos_v5_dashboard" {
   description = "Indicates if the CUDOS V5 framework should be enabled"
   type        = bool
   default     = true
-}
-
-variable "enable_compute_optimization_hub" {
-  description = "Indicates if the Compute Optimization Hub components into destination account"
-  type        = bool
-  default     = true
-}
-
-variable "enable_cudos_dashboard" {
-  description = "Indicates if the CUDOS dashboard should be enabled"
-  type        = bool
-  default     = false
 }
 
 variable "enable_compute_optimizer_dashboard" {

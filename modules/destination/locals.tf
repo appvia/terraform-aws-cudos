@@ -14,8 +14,6 @@ locals {
   ]))
   ## Prefix used for versioned templates in S3
   stacks_templates_prefix = format("revisions/%s", local.stacks_templates_hash)
-  ## Indicates if we should provision the quicksight admin user
-
   ## Is the user mappings for the quicksight groups - combined for both IAM and QuickSight users
   user_group_mappings = merge([
     for n, g in var.quicksight_groups : {

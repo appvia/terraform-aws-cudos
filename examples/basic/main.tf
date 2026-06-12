@@ -16,18 +16,20 @@ module "destination" {
 
   cloudformation_bucket_name = local.cloudformation_bucket_name
   dashboards_bucket_name     = local.dashboard_bucket_name
-  enable_sso                 = true
+  enable_quicksight_admin    = false
+  enable_sso                 = false
   payer_accounts             = ["1234343434"]
-  saml_metadata              = file("${path.module}/assets/saml-metadata.xml")
+  ## Must be a user in var.quicksight_admin_group with QuickSight access in Identity Center
+  quicksight_dashboard_owner = "finops-admin"
   tags                       = var.tags
-
-  quicksight_admin_email     = "quicksight-admin@example.com"
-  quicksight_admin_username  = "admin"
-  quicksight_dashboard_owner = "admin"
 
   providers = {
     aws = aws.cost_analysis
   }
+
+  depends_on = [
+    aws_quicksight_account_subscription.subscription,
+  ]
 }
 
 module "source" {
@@ -35,7 +37,6 @@ module "source" {
 
   ## The account id for the destination below
   destination_account_id        = "1234343434"
-  destination_bucket_arn        = module.destination.destination_bucket_arn
   enable_backup_module          = true
   enable_budgets_module         = true
   enable_ecs_chargeback_module  = true

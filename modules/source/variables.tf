@@ -3,11 +3,6 @@ variable "destination_account_id" {
   type        = string
 }
 
-variable "destination_bucket_arn" {
-  description = "The ARN of the bucket where to replicate the data from the CUR"
-  type        = string
-}
-
 variable "enable_focus" {
   description = "Indicates if the FOCUS module should be enabled"
   type        = bool

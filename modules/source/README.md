@@ -2,15 +2,14 @@
 ## Providers
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.0 |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-| ---- | ----------- | ---- | ------- | :------: |
+|------|-------------|------|---------|:--------:|
 | <a name="input_destination_account_id"></a> [destination\_account\_id](#input\_destination\_account\_id) | The AWS account ID for the destination account | `string` | n/a | yes |
-| <a name="input_destination_bucket_arn"></a> [destination\_bucket\_arn](#input\_destination\_bucket\_arn) | The ARN of the bucket where to replicate the data from the CUR | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to all resources | `map(string)` | n/a | yes |
 | <a name="input_enable_backup_module"></a> [enable\_backup\_module](#input\_enable\_backup\_module) | Indicates if the Backup module should be enabled | `bool` | `true` | no |
 | <a name="input_enable_budgets_module"></a> [enable\_budgets\_module](#input\_enable\_budgets\_module) | Indicates if the Budget module should be enabled | `bool` | `true` | no |
@@ -36,7 +35,7 @@
 ## Outputs
 
 | Name | Description |
-| ---- | ----------- |
+|------|-------------|
 | <a name="output_cloudformation_bucket_name"></a> [cloudformation\_bucket\_name](#output\_cloudformation\_bucket\_name) | The name of the bucket to store the CloudFormation templates |
 | <a name="output_cloudformation_bucket_url"></a> [cloudformation\_bucket\_url](#output\_cloudformation\_bucket\_url) | The URL of the bucket to store the CloudFormation templates |
 | <a name="output_cloudformation_templates_prefix"></a> [cloudformation\_templates\_prefix](#output\_cloudformation\_templates\_prefix) | The S3 key prefix (includes hash) for CloudFormation templates |
