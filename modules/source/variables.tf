@@ -39,8 +39,8 @@ variable "enable_compute_optimizer_module" {
   default     = true
 }
 
-variable "enable_compute_optimizization_hub" {
-  description = "Indicates if the Compute Optimizization Hub module should be enabled"
+variable "enable_compute_optimization_hub" {
+  description = "Indicates if the Compute Optimization Hub module should be enabled"
   type        = bool
   default     = false
 }

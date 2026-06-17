@@ -90,7 +90,7 @@ resource "aws_cloudformation_stack" "data_export_management" {
   parameters = {
     DestinationAccountId = var.destination_account_id
     EnableSCAD           = var.enable_scad ? "yes" : "no",
-    ManageCOH            = var.enable_compute_optimizization_hub ? "yes" : "no",
+    ManageCOH            = var.enable_compute_optimization_hub ? "yes" : "no",
     ManageCUR2           = var.enable_cur2 ? "yes" : "no"
     ManageFOCUS          = var.enable_focus ? "yes" : "no"
     ResourcePrefix       = var.resource_prefix
