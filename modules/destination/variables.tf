@@ -325,5 +325,5 @@ variable "share_dashboard" {
 variable "cfn_dashboards_version" {
   description = "The version of the CUDOS dashboards"
   type        = string
-  default     = "4.3.7"
+  default     = "4.4.12"
 }
