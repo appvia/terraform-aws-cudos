@@ -14,7 +14,7 @@
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to all resources | `map(string)` | n/a | yes |
 | <a name="input_athena_query_results_bucket"></a> [athena\_query\_results\_bucket](#input\_athena\_query\_results\_bucket) | The name of the Athena query results bucket | `string` | `""` | no |
 | <a name="input_athena_workgroup"></a> [athena\_workgroup](#input\_athena\_workgroup) | The name of the Athena workgroup | `string` | `""` | no |
-| <a name="input_cfn_dashboards_version"></a> [cfn\_dashboards\_version](#input\_cfn\_dashboards\_version) | The version of the CUDOS dashboards | `string` | `"4.3.7"` | no |
+| <a name="input_cfn_dashboards_version"></a> [cfn\_dashboards\_version](#input\_cfn\_dashboards\_version) | The version of the CUDOS dashboards | `string` | `"4.4.12"` | no |
 | <a name="input_dashboard_suffix"></a> [dashboard\_suffix](#input\_dashboard\_suffix) | The suffix for the dashboards | `string` | `""` | no |
 | <a name="input_data_buckets_kms_keys_arns"></a> [data\_buckets\_kms\_keys\_arns](#input\_data\_buckets\_kms\_keys\_arns) | The ARNs of the KMS keys for the data buckets | `list(string)` | `[]` | no |
 | <a name="input_data_collection_primary_tag_name"></a> [data\_collection\_primary\_tag\_name](#input\_data\_collection\_primary\_tag\_name) | The primary tag name for the data collection | `string` | `"owner"` | no |
