@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   module-validation:
-    uses: appvia/appvia-cicd-workflows/.github/workflows/terraform-module-validation.yml@d356de2a6df8c4d482880e54a2a6255fdb2cf921 # main
+    uses: appvia/appvia-cicd-workflows/.github/workflows/terraform-module-validation.yml@108a4a75468886508a8279d5825df1164a994a00 # main
     name: Module Validation
     with:
       working-directory: examples/basic
