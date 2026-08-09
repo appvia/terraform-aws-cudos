@@ -21,7 +21,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Copying Upstream Files
-        uses: appvia/appvia-cicd-workflows/.github/actions/template-update@9f815b35dd18819f0854c52ee8cafd249b28681c # main
+        uses: appvia/appvia-cicd-workflows/.github/actions/template-update@7a4417e281f2b6fc8a8271b634bebeb11a7065e0 # main
         with:
           branch-name: cudos-template-update
           pull-request-title: CUDOS Template Update
