@@ -32,6 +32,7 @@
 | <a name="input_enable_cur2"></a> [enable\_cur2](#input\_enable\_cur2) | Indicates if the CUR2 module should be enabled | `bool` | `true` | no |
 | <a name="input_enable_ecs_chargeback_module"></a> [enable\_ecs\_chargeback\_module](#input\_enable\_ecs\_chargeback\_module) | Indicates if the ECS Chargeback module should be enabled | `bool` | `false` | no |
 | <a name="input_enable_health_events_module"></a> [enable\_health\_events\_module](#input\_enable\_health\_events\_module) | Indicates if the Health Events module should be enabled | `bool` | `true` | no |
+| <a name="input_enable_iam_principal_data"></a> [enable\_iam\_principal\_data](#input\_enable\_iam\_principal\_data) | Indicates if IAM principal (caller identity) allocation data should be included in CUR 2.0 data exports (adds the line\_item\_iam\_principal column) | `bool` | `false` | no |
 | <a name="input_enable_inventory_module"></a> [enable\_inventory\_module](#input\_enable\_inventory\_module) | Indicates if the Inventory module should be enabled | `bool` | `true` | no |
 | <a name="input_enable_kpi_dashboard"></a> [enable\_kpi\_dashboard](#input\_enable\_kpi\_dashboard) | Indicates if the KPI dashboard should be enabled | `bool` | `true` | no |
 | <a name="input_enable_lake_formation"></a> [enable\_lake\_formation](#input\_enable\_lake\_formation) | Indicates if the Lake Formation should be enabled | `bool` | `false` | no |

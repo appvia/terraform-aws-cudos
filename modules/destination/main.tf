@@ -233,11 +233,12 @@ resource "aws_cloudformation_stack" "data_export_destination" {
   template_url = format("%s/%s/cudos/%s", local.stacks_base_url, local.stacks_templates_prefix, "data-exports-aggregation.yaml")
 
   parameters = {
-    "DestinationAccountId" = local.account_id,
-    "EnableSCAD"           = var.enable_scad ? "yes" : "no",
-    "ManageCOH"            = var.enable_compute_optimization_hub ? "yes" : "no",
-    "ManageCUR2"           = var.enable_cur2 ? "yes" : "no"
-    "SourceAccountIds"     = join(",", local.payer_account_ids),
+    "DestinationAccountId"   = local.account_id,
+    "EnableIAMPrincipalData" = var.enable_iam_principal_data ? "yes" : "no",
+    "EnableSCAD"             = var.enable_scad ? "yes" : "no",
+    "ManageCOH"              = var.enable_compute_optimization_hub ? "yes" : "no",
+    "ManageCUR2"             = var.enable_cur2 ? "yes" : "no"
+    "SourceAccountIds"       = join(",", local.payer_account_ids),
   }
 
   lifecycle {

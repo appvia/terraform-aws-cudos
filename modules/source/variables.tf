@@ -98,6 +98,12 @@ variable "enable_rightsizing_module" {
   default     = true
 }
 
+variable "enable_iam_principal_data" {
+  description = "Indicates if IAM principal (caller identity) allocation data should be included in CUR 2.0 data exports (adds the line_item_iam_principal column)"
+  type        = bool
+  default     = false
+}
+
 variable "enable_scad" {
   description = "Indicates if the SCAD module should be enabled, only available when Cora enabled"
   type        = bool
